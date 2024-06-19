@@ -1,0 +1,4 @@
+vendor/
+config/
+.htaccess
+ignore.php
