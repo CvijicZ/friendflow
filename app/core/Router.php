@@ -3,30 +3,40 @@
 namespace App\Core;
 
 use App\Middlewares\AuthMiddleware;
+use App\Core\Database;
+use App\Controllers\AuthController;
 
-class Router {
+class Router
+{
     private $routes = [
         'GET' => [
             '/' => 'App\Controllers\HomeController@index',
             '/login' => 'App\Controllers\AuthController@showLoginForm',
             '/register' => 'App\Controllers\AuthController@showRegisterForm',
-            '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\ProfileController@index'],
+            '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@show'],
         ],
         'POST' => [
             '/login' => 'App\Controllers\AuthController@login',
             '/register' => 'App\Controllers\AuthController@register',
         ],
         'PUT' => [
-            '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\ProfileController@update'],
+            '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@update'],
         ],
         'DELETE' => [
-            '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\ProfileController@delete'],
+            '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@delete'],
         ]
     ];
 
     private $baseUri = '/friendflow';
+    private $db;
 
-    public function dispatch($uri, $method) {
+    public function __construct()
+    {
+        $this->db = new Database('localhost', 'friendflow', 'root', '');
+    }
+
+    public function dispatch($uri, $method)
+    {
         // Remove the base URI from the requested URI
         $uri = $this->removeBaseUri($uri);
 
@@ -34,18 +44,18 @@ class Router {
             $route = $this->routes[$method][$uri];
             if (is_array($route) && isset($route['middleware'])) {
                 $this->handleMiddleware($route['middleware']);
-                $this->callAction(...explode('@', $route['controller']));
+                $this->callAction($route['controller']);
             } else {
-                $this->callAction(...explode('@', $route));
+                $this->callAction($route);
             }
         } else {
-            // 404 Not Found
             http_response_code(404);
             echo "404 Not Found";
         }
-    } 
+    }
 
-    private function removeBaseUri($uri) {
+    private function removeBaseUri($uri)
+    {
         $baseUri = rtrim($this->baseUri, '/') . '/';
         if (strpos($uri, $baseUri) === 0) {
             $uri = substr($uri, strlen($baseUri) - 1);
@@ -53,7 +63,8 @@ class Router {
         return $uri;
     }
 
-    private function handleMiddleware($middleware) {
+    private function handleMiddleware($middleware)
+    {
         switch ($middleware) {
             case 'auth':
                 AuthMiddleware::handle();
@@ -61,8 +72,10 @@ class Router {
         }
     }
 
-    private function callAction($controller, $action) {
-        $controller = new $controller();
+    private function callAction($controllerAction)
+    {
+        list($controller, $action) = explode('@', $controllerAction);
+        $controller = new $controller($this->db);
         $controller->$action();
     }
 }
