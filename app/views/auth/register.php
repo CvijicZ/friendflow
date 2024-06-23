@@ -14,6 +14,7 @@
         <input type="text" name="surname" placeholder="Surname:" required>
         <input type="email" name="email" placeholder="Email" required>
         <input type="password" name="password" placeholder="Password" required>
+        <input type="password" name="password_repeated" placeholder="Repeat password" required>
 
         <label for="birth_year">Year of Birth:</label>
         <select name="birth_year" id="birth_year" required>

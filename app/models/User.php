@@ -35,4 +35,13 @@ class User
             return false;
         }
     }
+    public function emailExists($email)
+    {
+        $sql = "SELECT COUNT(*) FROM users WHERE email = :email";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+
+        return $stmt->fetchColumn() > 0;
+    }
 }
