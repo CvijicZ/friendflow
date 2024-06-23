@@ -4,13 +4,14 @@ namespace App\Core;
 
 use App\Middlewares\AuthMiddleware;
 use App\Core\Database;
-use App\Controllers\AuthController;
+use App\Middlewares\CSRFMiddleware;
 
 class Router
 {
     private $routes = [
         'GET' => [
             '/' => 'App\Controllers\HomeController@index',
+            '/error' => 'App\Controllers\HomeController@error',
             '/login' => 'App\Controllers\AuthController@showLoginForm',
             '/register' => 'App\Controllers\AuthController@showRegisterForm',
             '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@show'],
@@ -40,17 +41,24 @@ class Router
         // Remove the base URI from the requested URI
         $uri = $this->removeBaseUri($uri);
 
+        // If request is POST always handle CSRF token
         if (isset($this->routes[$method][$uri])) {
-            $route = $this->routes[$method][$uri];
-            if (is_array($route) && isset($route['middleware'])) {
-                $this->handleMiddleware($route['middleware']);
-                $this->callAction($route['controller']);
-            } else {
-                $this->callAction($route);
+            if ($method === 'POST') {
+                CSRFMiddleware::handle();
             }
-        } else {
-            http_response_code(404);
-            echo "404 Not Found";
+
+            if (isset($this->routes[$method][$uri])) {
+                $route = $this->routes[$method][$uri];
+                if (is_array($route) && isset($route['middleware'])) {
+                    $this->handleMiddleware($route['middleware']);
+                    $this->callAction($route['controller']);
+                } else {
+                    $this->callAction($route);
+                }
+            } else {
+                http_response_code(404);
+                echo "404 Not Found";
+            }
         }
     }
 

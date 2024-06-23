@@ -37,6 +37,7 @@
             <?php endfor; ?>
         </select>
 
+        <input type="hidden" name="csrf_token" value="<?= \App\Middlewares\CSRFMiddleware::getToken() ?>">
         <button type="submit">Register</button>
     </form>
 </body>

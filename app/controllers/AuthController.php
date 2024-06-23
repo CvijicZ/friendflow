@@ -21,9 +21,14 @@ class AuthController extends Controller
     {
         $this->view('auth/register');
     }
+    public function showLoginForm()
+    {
+        $this->view('auth/login');
+    }
 
     public function register()
     {
+
         $name = trim($_POST['name']);
         $surname = trim($_POST['surname']);
         $email = trim($_POST['email']);
