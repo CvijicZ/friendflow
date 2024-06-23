@@ -6,6 +6,7 @@ use App\Core\Controller;
 use App\Models\User;
 use App\Core\Database;
 use App\Core\UserValidator;
+use App\Core\Flash;
 
 class AuthController extends Controller
 {
@@ -44,17 +45,22 @@ class AuthController extends Controller
             "birthday" => $birthDate
         ]);
 
-        // TODO: create FLASH session messages for error handling
         if (!$validator->hasErrors()) {
             $userModel = new User($this->db);
             if ($userModel->create($name, $surname, $email, $birthDate, $password)) {
-                echo "User registered successfully!";
+                Flash::set('success', "User successfuly registered.");
+                header("Location: /friendflow/login");
+                exit();
             } else {
-                echo "Error registering user.";
+                Flash::set('error', "Something went wrong.");
             }
 
         } else {
-            var_dump($errors);
+            foreach ($errors as $error) {
+                Flash::set('error', $error);
+            }
+            header("Location: /friendflow/register");
+            exit();
         }
     }
 }
