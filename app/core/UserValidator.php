@@ -13,6 +13,13 @@ class UserValidator
     {
         $this->userModel = $userModel;
     }
+    public function validateLogin(array $userInputs): array
+    {
+        $this->validateEmail($userInputs['email'], true);
+        $this->validatePassword($userInputs['password']);
+
+        return $this->errors;
+    }
     public function validateRegistration(array $userInputs): array
     {
         $this->alphaOnly("name", $userInputs['name']);
@@ -49,26 +56,32 @@ class UserValidator
         }
     }
 
-    public function alphaOnly($keyName, $string, $allowedLength=20){
+    public function alphaOnly($keyName, $string, $allowedLength = 20)
+    {
         if (empty($string) || strlen($string) > $allowedLength || !preg_match('/^[\p{L}]+$/u', $string)) {
-            $this->errors[$keyName] = 'Only letters are allowed, max length is:'.$allowedLength;
+            $this->errors[$keyName] = 'Only letters are allowed, max length is:' . $allowedLength;
         }
     }
-    public function validateEmail($email)
+    public function validateEmail($email, $allowTakenEmail = false)
     {
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->errors['email'] = 'Incorrect email format.';
-        }
-        else if($this->userModel->emailExists($email)){
-            $this->errors['email'] = 'Email is already taken.';
+        if (!$allowTakenEmail) {
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $this->errors['email'] = 'Incorrect email format.';
+            } else if ($this->userModel->emailExists($email)) {
+                $this->errors['email'] = 'Email is already taken.';
+            }
+        } else {
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $this->errors['email'] = 'Incorrect email format.';
+            }
         }
     }
     public function validatePassword($password)
     {
         if (empty($password)) {
             $this->errors['password'] = 'Password is required.';
-        } elseif (strlen($password) < 6) {
-            $this->errors['password'] = 'Password must be at least 6 characters long.';
+        } elseif (strlen($password) < 6 || strlen($password) > 30) {
+            $this->errors['password'] = 'Password must be between 6 and 30 characters long.';
         }
     }
 

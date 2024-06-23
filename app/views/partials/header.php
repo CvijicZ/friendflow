@@ -18,16 +18,26 @@
     <nav class="navbar sticky-top navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand">Navbar</a>
-            <form class="d-flex" action="">
-                <input class="form-control me-2" type="text" placeholder="E-mail" aria-label="Email">
-                <input class="form-control me-2" type="password" placeholder="Password" aria-label="Password">
-                <button class="btn btn-outline-primary" type="submit">Login</button>
-            </form>
+
+            <?php if (\App\Middlewares\AuthMiddleware::isLoggedIn()): ?>
+                <button type="button" class="btn btn-outline-primary"><a href="/friendflow/logout">Logout</a></button>
+
+            <?php else: ?>
+                <form class="d-flex" action="/friendflow/login" method="POST">
+                    <input class="form-control me-2" type="email" name="email" placeholder="E-mail" aria-label="Email">
+                    <input class="form-control me-2" type="password" name="password" placeholder="Password"
+                        aria-label="Password">
+
+                    <input type="hidden" name="csrf_token" value="<?= \App\Middlewares\CSRFMiddleware::getToken() ?>">
+                    <button class="btn btn-outline-primary" type="submit">Login</button>
+                </form>
+
+            <?php endif; ?>
         </div>
     </nav>
-<!-- End of navbar -->
+    <!-- End of navbar -->
 
-<!-- Flash messages -->
+    <!-- Flash messages -->
     <?php if ($messages = \App\Core\Flash::get('error')): ?>
         <?php foreach ($messages as $message): ?>
             <div class="alert alert-danger" role="alert">

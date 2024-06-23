@@ -13,6 +13,7 @@ class Router
             '/' => 'App\Controllers\HomeController@index',
             '/error' => 'App\Controllers\HomeController@error',
             '/login' => 'App\Controllers\AuthController@showLoginForm',
+            '/logout' => 'App\Controllers\AuthController@logout',
             '/register' => 'App\Controllers\AuthController@showRegisterForm',
             '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@show'],
         ],

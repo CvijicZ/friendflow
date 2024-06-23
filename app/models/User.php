@@ -14,6 +14,14 @@ class User
         $this->db = $db;
     }
 
+    public function show($id)
+    {
+        $sql = "SELECT id, name, surname, email, birthday FROM users WHERE id=:id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
     public function create($name, $surname, $email, $birthday, $password)
     {
         try {
@@ -43,5 +51,13 @@ class User
         $stmt->execute();
 
         return $stmt->fetchColumn() > 0;
+    }
+
+    public function findByEmail($email)
+    {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_OBJ);
     }
 }

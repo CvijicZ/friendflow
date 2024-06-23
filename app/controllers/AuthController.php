@@ -26,6 +26,48 @@ class AuthController extends Controller
         $this->view('auth/login');
     }
 
+    public function logout()
+    {
+        session_start();
+        session_unset();
+        session_destroy();
+
+        header('Location: /friendflow/');
+        exit();
+    }
+    public function login()
+    {
+        $email = trim($_POST['email'] ?? '');
+        $password = trim($_POST['password'] ?? '');
+
+        $validator = new UserValidator(new User($this->db));
+        $errors = $validator->validateLogin([
+            "email" => $email,
+            "password" => $password
+        ]);
+
+        $userModel = new User($this->db);
+        $user = $userModel->findByEmail($email);
+
+        if (!$validator->hasErrors()) {
+            if ($user && password_verify($password, $user->password)) {
+                $_SESSION['user_id'] = $user->id;
+
+                header('Location: /friendflow');
+                exit();
+            } else {
+                Flash::set('error', 'Invalid email or password.');
+                header('Location: /friendflow/login');
+                exit();
+            }
+        } else {
+            foreach ($errors as $error) {
+                Flash::set('error', $error);
+            }
+            header("Location: /friendflow/login");
+            exit();
+        }
+    }
     public function register()
     {
 
