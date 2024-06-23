@@ -33,7 +33,7 @@ class Router
 
     public function __construct()
     {
-        $this->db = new Database('localhost', 'friendflow', 'root', '');
+        $this->db = new Database();
     }
 
     public function dispatch($uri, $method)
