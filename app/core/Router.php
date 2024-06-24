@@ -15,11 +15,12 @@ class Router
             '/login' => 'App\Controllers\AuthController@showLoginForm',
             '/logout' => 'App\Controllers\AuthController@logout',
             '/register' => 'App\Controllers\AuthController@showRegisterForm',
-            '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@show'],
+            '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@editProfile'],
         ],
         'POST' => [
             '/login' => 'App\Controllers\AuthController@login',
             '/register' => 'App\Controllers\AuthController@register',
+            '/updateProfile' => 'App\Controllers\UserController@updateProfile',
         ],
         'PUT' => [
             '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@update'],

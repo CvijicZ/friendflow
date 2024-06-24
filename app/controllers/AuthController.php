@@ -83,7 +83,7 @@ class AuthController extends Controller
         $birthDate = "$birthYear-$birthMonth-$birthDay";
 
         $validator = new UserValidator(new User($this->db));
-        $errors = $validator->validateRegistration([
+        $errors = $validator->validateProfileInfo([
             "name" => $name,
             "surname" => $surname,
             "email" => $email,

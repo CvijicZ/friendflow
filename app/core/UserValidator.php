@@ -13,6 +13,7 @@ class UserValidator
     {
         $this->userModel = $userModel;
     }
+
     public function validateLogin(array $userInputs): array
     {
         $this->validateEmail($userInputs['email'], true);
@@ -20,18 +21,32 @@ class UserValidator
 
         return $this->errors;
     }
-    public function validateRegistration(array $userInputs): array
+
+    public function validateProfileInfo(array $userInputs, bool $isProfileUpdate = false): array
     {
         $this->alphaOnly("name", $userInputs['name']);
         $this->alphaOnly("surname", $userInputs['surname']);
-        $this->validateEmail($userInputs['email']);
         $this->validateBirthDate($userInputs['birthday']);
-        $this->validatePassword($userInputs['password']);
-        $this->passwordMatch($userInputs['password'], $userInputs['password_repeated']);
+
+        if ($isProfileUpdate) {
+
+            $this->validateEmail($userInputs['email'], true, true);
+
+            if (!empty($userInputs['password'])) {
+                $this->validatePassword($userInputs['password']);
+                $this->passwordMatch($userInputs['password'], $userInputs['password_repeated']);
+            }
+
+        } else {
+            $this->validatePassword($userInputs['password']);
+            $this->passwordMatch($userInputs['password'], $userInputs['password_repeated']);
+            $this->validateEmail($userInputs['email']);
+
+        }
 
         return $this->errors;
-
     }
+
     function validateBirthDate($birthDate)
     {
 
@@ -49,7 +64,6 @@ class UserValidator
             return;
         }
 
-        // Check if the birth day is valid for the given month
         $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $birthMonth, $birthYear);
         if ($birthDay < 1 || $birthDay > $daysInMonth) {
             $this->errors['birthdate'] = 'Invalid day for given month.';
@@ -62,17 +76,23 @@ class UserValidator
             $this->errors[$keyName] = 'Only letters are allowed, max length is:' . $allowedLength;
         }
     }
-    public function validateEmail($email, $allowTakenEmail = false)
+    public function validateEmail($email, $allowTakenEmail = false, $isProfileUpdate = false)
     {
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->errors['email'] = 'Incorrect email format.';
+            return;
+        }
+
         if (!$allowTakenEmail) {
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $this->errors['email'] = 'Incorrect email format.';
-            } else if ($this->userModel->emailExists($email)) {
+            if ($this->userModel->emailExists($email)) {
                 $this->errors['email'] = 'Email is already taken.';
             }
-        } else {
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $this->errors['email'] = 'Incorrect email format.';
+        } elseif ($isProfileUpdate) {
+            // For profile updates, check if the email is different from current email and taken
+            $currentEmail = $this->userModel->getEmailById($_SESSION['user_id']);
+            if ($email !== $currentEmail && $this->userModel->emailExists($email)) {
+                $this->errors['email'] = 'Email is already taken.';
             }
         }
     }
@@ -91,7 +111,6 @@ class UserValidator
             $this->errors['password_repeated'] = 'Passwords does not match.';
         }
     }
-
     public function hasErrors()
     {
         return !empty($this->errors);

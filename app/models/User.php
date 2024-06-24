@@ -43,6 +43,42 @@ class User
             return false;
         }
     }
+
+    public function getEmailById($id)
+    {
+        $sql = "SELECT email FROM users WHERE id=:id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_COLUMN);
+    }
+    public function update($name, $surname, $email, $birthDate, $password = null)
+    {
+        $userId = $_SESSION['user_id'];
+        $query = "UPDATE users SET name = :name, surname = :surname, email = :email, birthday = :birthday";
+
+        if ($password !== null) {
+            $query .= ", password = :password";
+        }
+
+        $query .= " WHERE id = :id";
+
+        $stmt = $this->db->prepare($query);
+
+        $stmt->bindParam(':name', $name, PDO::PARAM_STR);
+        $stmt->bindParam(':surname', $surname, PDO::PARAM_STR);
+        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+        $stmt->bindParam(':birthday', $birthDate, PDO::PARAM_STR);
+        $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
+
+        if ($password !== null) {
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
+        }
+
+        return $stmt->execute();
+    }
+
     public function emailExists($email)
     {
         $sql = "SELECT COUNT(*) FROM users WHERE email = :email";
