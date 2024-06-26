@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\User;
 use App\Core\Database;
-use App\Core\UserValidator;
+use App\Validation\UserValidator;
 use App\Core\Flash;
 
 class AuthController extends Controller

@@ -6,7 +6,7 @@ use App\Core\Controller;
 use App\Models\User;
 use App\Core\Database;
 use App\Core\Flash;
-use App\Core\UserValidator;
+use App\Validation\UserValidator;
 
 class UserController extends Controller
 {

@@ -1,274 +1,164 @@
 <style>
-        /* body {
-            background-color: #121212;
-            color: #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-        .content {
-            display: flex;
-            flex: 1;
-        }
-        .sidebar {
-            flex: 0 0 300px;
-            padding: 15px;
-        }
-        .main-content {
-            flex: 1;
-            padding: 15px;
-        } */
-        /* .card {
-            background-color: #1e1e1e;
-            color: #e0e0e0;
-        }
-        .btn-link {
-            color: #bb86fc;
-        }
-        .btn-primary {
-            background-color: #bb86fc;
-            border: none;
-        }
-        .form-control {
-            background-color: #2e2e2e;
-            color: #e0e0e0;
-            border: 1px solid #4a4a4a;
-        } */
-    </style>
+    body {
+        overflow: hidden;
+    }
 
-<div class="container-fluid mt-1">
-<div class="row">
+    .col-8::-webkit-scrollbar {
+        display: none;
+    }
+
+    .col-8 {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
+
+<div class="container-fluid mt-1 vh-100 ">
+
+    <div class="row">
+
         <!-- Left Sidebar -->
-        <div class="sidebar bg-dark text-light position-sticky top-0 start-0 col-3">
+        <div class="sidebar bg-dark text-light col-2" style="height: 100vh; overflow: hidden;">
+
             <div class="profile-info mb-3">
                 <h4>Profile Info</h4>
-                <p>Name: John Doe</p>
-                <p>Email: john.doe@example.com</p>
+                <p><?= htmlspecialchars($data['auth_user']['name']) . " " . htmlspecialchars($data['auth_user']['surname']) ?>
+                </p>
+                <p><?= htmlspecialchars($data['auth_user']['email']) ?></p>
+                <p>Birthday: <?= htmlspecialchars($data['auth_user']['birthday'])?></p>
             </div>
+
             <div class="suggestions">
                 <h4>Suggestions</h4>
-                <div class="suggestion mb-2">
-                    <div class="d-flex align-items-center">
-                        <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
-                        <span>Jane Smith</span>
+                <?php foreach ($data['all_users'] as $user): ?>
+
+                    <div class="suggestion mb-2">
+                        <div class="d-flex align-items-center">
+                            <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
+                            <span><?= htmlspecialchars($user['name']) . " " . htmlspecialchars($user['surname']) ?></span>
+                        </div>
+                        <button class="btn btn-primary btn-sm mt-2">Add Friend</button>
                     </div>
-                    <button class="btn btn-primary btn-sm mt-2">Add Friend</button>
-                </div>
-                <div class="suggestion">
-                    <div class="d-flex align-items-center">
-                        <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
-                        <span>Mike Johnson</span>
-                    </div>
-                    <button class="btn btn-primary btn-sm mt-2">Add Friend</button>
-                </div>
+                <?php endforeach; ?>
             </div>
+
         </div>
+        <!-- End of left sidebar -->
+
         <!-- Main Section -->
-        <div class="main-content overflow-auto col-6">
+        <div class="main-content col-8 overflow-auto pb-5" style="height: 100vh;overflow-x: hidden;">
 
-            <div class="card mb-3 w-auto bg-dark text-light">
+            <!-- New Post Form -->
+            <div class="card mb-3 w-auto bg-dark text-light ">
                 <div class="card-body">
                     <div class="media">
-                        <img src="https://via.placeholder.com/40" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
+                        <img src="https://via.placeholder.com/40" class="mr-3 rounded-circle" alt="User Profile"
+                            style="width:64px;height:64px;">
                         <div class="media-body">
-                            <h5 class="mt-0">User Name</h5>
-                            <p>This is a post content. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                            <img src="https://via.placeholder.com/40" class="img-fluid" alt="Post Image">
-                        </div>
-                    </div>
-                    <button class="btn btn-link mt-3" type="button" data-toggle="collapse" data-target="#commentsSection" aria-expanded="false" aria-controls="commentsSection">
-                        Show Comments
-                    </button>
-                    <div class="collapse" id="commentsSection">
-                        <div class="card card-body mt-3 bg-dark text-light">
-                            <div class="media mb-3">
-                                <img src="commenter1.jpg" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
-                                <div class="media-body">
-                                    <h6 class="mt-0">Commenter Name</h6>
-                                    <p>This is a comment content.</p>
+                            <h5 class="mt-0">
+                                <?= htmlspecialchars($data['auth_user']['name']) . " " . htmlspecialchars($data['auth_user']['surname']) ?>
+                            </h5>
+
+                            <form action="/friendflow/post" method="POST" enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <textarea class="form-control" name="post_text" rows="3"
+                                        placeholder="What's on your mind?"></textarea>
                                 </div>
-                            </div>
-                            <div class="media">
-                                <img src="commenter2.jpg" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
-                                <div class="media-body">
-                                    <h6 class="mt-0">Commenter Name</h6>
-                                    <p>This is another comment content.</p>
+                                <div class="form-group">
+                                    <label class="btn btn-secondary">
+                                        <i class="fa fa-upload"></i> Upload Image
+                                        <input type="file" name="post_image" class="form-control-file d-none">
+                                    </label>
                                 </div>
-                            </div>
-                            <div class="mt-3">
-                                <textarea class="form-control" rows="2" placeholder="Add a comment..."></textarea>
-                                <button class="btn btn-primary mt-2">Post Comment</button>
-                            </div>
+                                <input type="hidden" name="csrf_token" value="<?= \App\Middlewares\CSRFMiddleware::getToken() ?>">
+                                <button type="submit" class="btn btn-primary">Post</button>
+                            </form>
+
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- End of new post form -->
 
-            <div class="card mb-3 w-auto bg-dark text-light">
-                <div class="card-body">
-                    <div class="media">
-                        <img src="https://via.placeholder.com/40" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
-                        <div class="media-body">
-                            <h5 class="mt-0">User Name</h5>
-                            <p>This is a post content. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                            <img src="https://via.placeholder.com/40" class="img-fluid" alt="Post Image">
+            <!-- List of all posts -->
+            <?php
+            foreach ($data['posts'] as $post): ?>
+                <div class="card mb-3 w-auto bg-dark text-light">
+
+                    <div class="card-body">
+                        <div class="media">
+                            <!-- If post is created by auth user show options -->
+                            <?php if ($post['user_id'] == $_SESSION['user_id']): ?>
+                                <div class="dropdown" style="position: absolute; top: 10px; right: 10px;">
+                                    <button class="btn btn-link p-0" type="button" id="dropdownMenuButton<?= $post['id'] ?>"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                        aria-labelledby="dropdownMenuButton<?= $post['id'] ?>">
+                                        <a class="dropdown-item" href="#">Edit Post</a>
+                                        <a class="dropdown-item" href="#">Delete Post</a>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            <img src="app/storage/images/post_images/<?= htmlspecialchars($post['image_name']) ?>"
+                                class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
+                            <div class="media-body">
+                                <h5 class="mt-0">
+                                    <?= htmlspecialchars($post['user']['name']) . " " . htmlspecialchars($post['user']['surname']) ?>
+                                </h5>
+                                <small style="display:block;margin-top:0;font-size:11px;"><?= $post['created_at'] ?></small>
+                                <p style="font-weight:bold;"><?= htmlspecialchars($post['content']) ?></p>
+
+                                <?php if (!empty($post['image_name'])): ?>
+                                    <img src="app/storage/images/post_images/<?= htmlspecialchars($post['image_name']) ?>"
+                                        class="img-fluid" alt="Post Image">
+
+                                <?php endif; ?>
+                            </div>
                         </div>
-                    </div>
-                    <button class="btn btn-link mt-3" type="button" data-toggle="collapse" data-target="#commentsSection" aria-expanded="false" aria-controls="commentsSection">
-                        Show Comments
-                    </button>
-                    <div class="collapse" id="commentsSection">
-                        <div class="card card-body mt-3 bg-dark text-light">
-                            <div class="media mb-3">
-                                <img src="commenter1.jpg" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
-                                <div class="media-body">
-                                    <h6 class="mt-0">Commenter Name</h6>
-                                    <p>This is a comment content.</p>
+                        <button class="btn btn-link mt-3" type="button" data-toggle="collapse"
+                            data-target="#comments_<?= $post['id'] ?>" aria-expanded="false"
+                            aria-controls="commentsSection">
+                            Show Comments
+                        </button>
+
+                        <div class="collapse" id="comments_<?= $post['id'] ?>">
+                            <div class="card card-body mt-3 bg-dark text-light">
+                                <div class="media mb-3">
+                                    <img src="commenter1.jpg" class="mr-3 rounded-circle" alt="Commenter Profile"
+                                        style="width:48px;height:48px;">
+                                    <div class="media-body">
+                                        <h6 class="mt-0">Commenter Name</h6>
+                                        <p>This is a comment content.</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="media">
-                                <img src="commenter2.jpg" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
-                                <div class="media-body">
-                                    <h6 class="mt-0">Commenter Name</h6>
-                                    <p>This is another comment content.</p>
+                                <div class="media">
+                                    <img src="commenter2.jpg" class="mr-3 rounded-circle" alt="Commenter Profile"
+                                        style="width:48px;height:48px;">
+                                    <div class="media-body">
+                                        <h6 class="mt-0">Commenter Name</h6>
+                                        <p>This is another comment content.</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="mt-3">
-                                <textarea class="form-control" rows="2" placeholder="Add a comment..."></textarea>
-                                <button class="btn btn-primary mt-2">Post Comment</button>
+                                <div class="mt-3">
+                                    <textarea class="form-control" rows="2" placeholder="Add a comment..."></textarea>
+                                    <button class="btn btn-primary mt-2">Post Comment</button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="card mb-3 w-auto text-light bg-dark">
-                <div class="card-body">
-                    <div class="media">
-                        <img src="https://via.placeholder.com/40" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
-                        <div class="media-body">
-                            <h5 class="mt-0">User Name</h5>
-                            <p>This is a post content. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                            <img src="https://via.placeholder.com/40" class="img-fluid" alt="Post Image">
-                        </div>
-                    </div>
-                    <button class="btn btn-link mt-3" type="button" data-toggle="collapse" data-target="#commentsSection" aria-expanded="false" aria-controls="commentsSection">
-                        Show Comments
-                    </button>
-                    <div class="collapse" id="commentsSection">
-                        <div class="card card-body mt-3 bg-dark text-light">
-                            <div class="media mb-3">
-                                <img src="commenter1.jpg" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
-                                <div class="media-body">
-                                    <h6 class="mt-0">Commenter Name</h6>
-                                    <p>This is a comment content.</p>
-                                </div>
-                            </div>
-                            <div class="media">
-                                <img src="commenter2.jpg" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
-                                <div class="media-body">
-                                    <h6 class="mt-0">Commenter Name</h6>
-                                    <p>This is another comment content.</p>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <textarea class="form-control" rows="2" placeholder="Add a comment..."></textarea>
-                                <button class="btn btn-primary mt-2">Post Comment</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card mb-3 w-auto text-light bg-dark">
-                <div class="card-body">
-                    <div class="media">
-                        <img src="https://via.placeholder.com/40" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
-                        <div class="media-body">
-                            <h5 class="mt-0">User Name</h5>
-                            <p>This is a post content. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                            <img src="https://via.placeholder.com/40" class="img-fluid" alt="Post Image">
-                        </div>
-                    </div>
-                    <button class="btn btn-link mt-3" type="button" data-toggle="collapse" data-target="#commentsSection" aria-expanded="false" aria-controls="commentsSection">
-                        Show Comments
-                    </button>
-                    <div class="collapse" id="commentsSection">
-                        <div class="card card-body mt-3 bg-dark text-light">
-                            <div class="media mb-3">
-                                <img src="commenter1.jpg" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
-                                <div class="media-body">
-                                    <h6 class="mt-0">Commenter Name</h6>
-                                    <p>This is a comment content.</p>
-                                </div>
-                            </div>
-                            <div class="media">
-                                <img src="commenter2.jpg" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
-                                <div class="media-body">
-                                    <h6 class="mt-0">Commenter Name</h6>
-                                    <p>This is another comment content.</p>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <textarea class="form-control" rows="2" placeholder="Add a comment..."></textarea>
-                                <button class="btn btn-primary mt-2">Post Comment</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card mb-3 w-auto text-light bg-dark">
-                <div class="card-body">
-                    <div class="media">
-                        <img src="https://via.placeholder.com/40" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
-                        <div class="media-body">
-                            <h5 class="mt-0">User Name</h5>
-                            <p>This is a post content. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                            <img src="https://via.placeholder.com/40" class="img-fluid" alt="Post Image">
-                        </div>
-                    </div>
-                    <button class="btn btn-link mt-3" type="button" data-toggle="collapse" data-target="#commentsSection" aria-expanded="false" aria-controls="commentsSection">
-                        Show Comments
-                    </button>
-                    <div class="collapse" id="commentsSection">
-                        <div class="card card-body mt-3 bg-dark text-light">
-                            <div class="media mb-3">
-                                <img src="commenter1.jpg" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
-                                <div class="media-body">
-                                    <h6 class="mt-0">Commenter Name</h6>
-                                    <p>This is a comment content.</p>
-                                </div>
-                            </div>
-                            <div class="media">
-                                <img src="commenter2.jpg" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
-                                <div class="media-body">
-                                    <h6 class="mt-0">Commenter Name</h6>
-                                    <p>This is another comment content.</p>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <textarea class="form-control" rows="2" placeholder="Add a comment..."></textarea>
-                                <button class="btn btn-primary mt-2">Post Comment</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            
-
-
+            <?php endforeach; ?>
         </div>
-
-
 
         <!-- Right Sidebar -->
-        <div class="sidebar bg-dark text-light col-3">
+        <div class="sidebar bg-dark text-light col-2" style="height: 100vh; overflow: hidden;">
             <div class="weather mb-3">
                 <h4>Weather</h4>
                 <p>Weather info will be here...</p>
             </div>
+
             <div class="chat">
                 <h4>Available Friends</h4>
                 <div class="friend mb-2" data-id="1" data-name="Anna Williams">
@@ -310,13 +200,15 @@
             </div>
         </div>
 
-        </div>
     </div>
+</div>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 <script>
 
-        $(document).ready(function(){
-        $('[data-toggle="collapse"]').on('click', function() {
+    $(document).ready(function () {
+        $('[data-toggle="collapse"]').on('click', function () {
             var target = $(this).data('target');
             $(target).collapse('toggle');
         });

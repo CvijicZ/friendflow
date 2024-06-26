@@ -13,6 +13,12 @@ class User
     {
         $this->db = $db;
     }
+    public function index()
+    {
+        $sql = "SELECT id,name,surname,email, birthday FROM USERS";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     public function show($id)
     {
