@@ -25,6 +25,7 @@ class Router
         ],
         'PUT' => [
             '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@update'],
+            '/post' => ['middleware' => 'auth', 'controller' => 'App\Controllers\PostController@update'],
         ],
         'DELETE' => [
             '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@delete'],
@@ -42,24 +43,28 @@ class Router
 
     public function dispatch($uri, $method)
     {
-        // Remove the base URI from the requested URI
         $uri = $this->removeBaseUri($uri);
 
-        // If request is POST always handle CSRF token
         if ($method === 'POST' && isset($this->routes[$method][$uri])) {
             CSRFMiddleware::handle();
         }
 
-        // Match the route and extract the id for DELETE requests
-        if ($method === 'DELETE') {
-            $route = $this->matchRoute($uri, 'DELETE');
+        if ($method === 'DELETE' || $method === 'PUT') {
+            $route = $this->matchRoute($uri, $method);
             if ($route) {
                 $uriParts = explode('/', $uri);
                 $id = end($uriParts);
 
                 if (is_numeric($id)) {
                     $this->handleMiddleware($route['middleware']);
-                    $this->callAction($route['controller'], ['id' => $id]);
+                    $data = ['id' => $id];
+                    parse_str(file_get_contents('php://input'), $_PUT);
+
+                    if (!empty($_PUT)) {
+                        $data = array_merge($data, $_PUT);
+                    }
+
+                    $this->callAction($route['controller'], $data);
                     return;
                 }
             }
@@ -77,7 +82,6 @@ class Router
         http_response_code(404);
         echo "404 Not Found";
     }
-
     private function removeBaseUri($uri)
     {
         $baseUri = rtrim($this->baseUri, '/') . '/';
@@ -86,7 +90,6 @@ class Router
         }
         return $uri;
     }
-
     private function handleMiddleware($middleware)
     {
         switch ($middleware) {
@@ -95,7 +98,6 @@ class Router
                 break;
         }
     }
-
     private function callAction($controllerAction, $params = [])
     {
         list($controller, $action) = explode('@', $controllerAction);
@@ -103,12 +105,11 @@ class Router
 
         // Make sure params are passed as positional arguments
         if (!empty($params)) {
-            call_user_func_array([$controller, $action], array_values($params));
+            call_user_func_array([$controller, $action], $params);
         } else {
             $controller->$action();
         }
     }
-
     private function matchRoute($uri, $method)
     {
         foreach ($this->routes[$method] as $route => $config) {

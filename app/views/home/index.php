@@ -12,6 +12,8 @@
         scrollbar-width: none;
     }
 </style>
+<div id="alerts-container"></div>
+
 <meta name="csrf-token" content="<?= App\Middlewares\CSRFMiddleware::getToken(); ?>">
 
 <div class="container-fluid mt-1 vh-100 ">
@@ -113,7 +115,9 @@
                                     <?= htmlspecialchars($post['user']['name']) . " " . htmlspecialchars($post['user']['surname']) ?>
                                 </h5>
                                 <small style="display:block;margin-top:0;font-size:11px;"><?= $post['created_at'] ?></small>
-                                <p style="font-weight:bold;"><?= htmlspecialchars($post['content']) ?></p>
+                                <p style="font-weight:bold;" id="post-content-<?= $post['id'] ?>">
+                                    <?= htmlspecialchars($post['content']) ?>
+                                </p>
 
                                 <?php if (!empty($post['image_name'])): ?>
                                     <img src="app/storage/images/post_images/<?= htmlspecialchars($post['image_name']) ?>"
@@ -228,6 +232,14 @@
             </div>
         </div>
     </div>
+</div>
+
+<div id="alertTemplate" class="alert alert-dismissible fade show d-none" role="alert">
+    <!-- Alert content -->
+    <strong>Message:</strong> <span id="alertMessage"></span>
+    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>

@@ -7,6 +7,7 @@ use App\Core\Flash;
 use App\Core\Database;
 use App\Models\Post;
 use App\Core\Controller;
+use App\Middlewares\CSRFMiddleware;
 
 class PostController extends Controller
 {
@@ -27,7 +28,6 @@ class PostController extends Controller
 
         if (isset($_FILES['post_image']) && $_FILES['post_image']['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES['post_image'];
-
             $uploadDir = 'app/storage/images/post_images/';
             $filename = uniqid('post_image_') . '_' . basename($file['name']);
             $targetPath = $uploadDir . $filename;
@@ -39,7 +39,6 @@ class PostController extends Controller
                 exit();
             }
         }
-
         $errors = $this->validator->validatePost($content, $file);
         if ($errors) {
             foreach ($errors as $error) {
@@ -52,25 +51,52 @@ class PostController extends Controller
                 Flash::set('error', "Failed to create post.");
             }
         }
-
         header("Location: /friendflow");
         exit();
     }
 
-    public function delete($id)
+    public function delete($id, $_token)
     {
-        
-        header('Content-Type: application/json; charset=utf-8');
-        if ($this->validator->usersPost($id)) {
+        if (CSRFMiddleware::compare($_token)) {
+            header('Content-Type: application/json; charset=utf-8');
+            if ($this->validator->usersPost($id)) {
 
-            if ($this->model->destroy($id)) {
-                echo json_encode(['status' => "success", "message" => "Post deleted."]);
+                if ($this->model->destroy($id)) {
+                    echo json_encode(['status' => "success", "message" => "Post deleted."]);
+                    exit();
+                }
+                echo json_encode(['status' => "error", 'message' => "Could not find post to delete"]);
                 exit();
             }
-            echo json_encode(['status' => "error", 'message' => "Could not find post to delete"]);
+            echo json_encode(['status' => "error", 'message' => "Insufficient permission"]);
             exit();
         }
-        echo json_encode(['status' => "error", 'message' => "Insufficient permission"]);
+        echo json_encode(['status' => "error", 'message' => "Invalid CSRF."]);
+        exit();
+
+    }
+
+    public function update($id, $newContent, $_token)
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        if (CSRFMiddleware::compare($_token)) {
+
+            if ($this->validator->usersPost($id)) {
+                if ($this->validator->validateContent($newContent)) {
+                    if ($this->model->update($id, $newContent)) {
+                        echo json_encode(['status' => "success", 'message' => "Post updated."]);
+                        exit();
+                    }
+                    echo json_encode(['status' => "error", 'message' => "Could not update post."]);
+                    exit();
+                }
+                echo json_encode(['status' => "error", 'message' => "Invalid content.", 'debug' => $this->validator->validateContent($newContent)]);
+                exit();
+            }
+            echo json_encode(['status' => "error", 'message' => "Insufficient permission"]);
+            exit();
+        }
+        echo json_encode(['status' => "error", 'message' => "Invalid CSRF"]);
         exit();
     }
 }

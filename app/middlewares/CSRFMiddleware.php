@@ -19,6 +19,9 @@ class CSRFMiddleware
             }
         }
     }
+    public static function compare($_token){
+        return $_SESSION['csrf_token'] == $_token;
+    }
     public static function generateToken()
     {
         if (!isset($_SESSION)) {

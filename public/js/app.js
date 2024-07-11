@@ -1,3 +1,5 @@
+
+// Delete post request
 $(document).ready(function () {
     var postIdToDelete;
 
@@ -13,15 +15,15 @@ $(document).ready(function () {
             url: '/friendflow/post/' + postIdToDelete,
             method: 'DELETE',
             data: {
-                postId: postIdToDelete,
-                csrf: csrfToken
+                id: postIdToDelete,
+                _token: csrfToken
             },
             success: function (response) {
                 $('#deleteModal').modal('hide');
-                if(response.status == "success"){
+                if (response.status == "success") {
                     $("#post-" + postIdToDelete).remove();
                 }
-                if(response.status == "error"){
+                if (response.status == "error") {
                     console.log(response.message);
                 }
             },
@@ -33,32 +35,51 @@ $(document).ready(function () {
     });
 });
 
+// Update post request
 $(document).ready(function () {
+    $('.edit-btn').click(function () {
+        var postIdToUpdate = $(this).data('post-id');
+        var currentText = $('#post-content-' + postIdToUpdate).text().trim();
 
-$('.edit-btn').click(function () {
-    var postId = $(this).data('post-id');
-    // Perform AJAX call for edit action
-    $.ajax({
-        url: 'edit.php', // Replace with your edit endpoint
-        method: 'POST', // Use POST or GET as needed
-        data: {
-            postId: postId // Pass postId for edit
-        },
-        success: function (response) {
-            // Handle success response
-            console.log('Edit successful:', response);
-            // Optionally, update UI or perform additional actions
-        },
-        error: function (xhr, status, error) {
-            // Handle error
-            console.error('Error occurred during edit:', error);
-        }
+        $('#post-content-' + postIdToUpdate).replaceWith('<input type="text" class="form-control edit-input" id="edit-input-' + postIdToUpdate + '" value="' + currentText + '">');
+        $('#edit-input-' + postIdToUpdate).focus();
+
+        $(document).on('keypress', '.edit-input', function (e) {
+            if (e.which == 13) {
+                var postIdToUpdate = $(this).attr('id').split('-')[2];
+                var newContent = $(this).val().trim();
+                var csrfToken = $('meta[name="csrf-token"]').attr('content');
+                var requestData = {
+                    id: postIdToUpdate,
+                    newContent: newContent,
+                    _token: csrfToken
+                };
+
+                $.ajax({
+                    url: '/friendflow/post/' + postIdToUpdate,
+                    method: 'PUT',
+                    data: requestData,
+                    success: function (response) {
+                        if (response.status == 'success') {
+                            $('#edit-input-' + postIdToUpdate).replaceWith('<p id="post-content-' + postIdToUpdate + '" style="font-weight:bold;">' + newContent + '</p>');
+
+                        }
+                        if (response.status == 'error') {
+                            showAlert(response.message, "danger");
+                            $('#edit-input-' + postIdToUpdate).replaceWith('<p id="post-content-' + postIdToUpdate + '" style="font-weight:bold;">' + currentText + '</p>');
+
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error occurred during edit:', error);
+                    }
+                });
+            }
+        });
     });
 });
-});
 
-
-
+// Other app logic
 $(document).ready(function () {
     const maxChats = 5;
     const openChats = new Set();
@@ -127,4 +148,16 @@ $('[data-toggle="collapse"]').on('click', function () {
     $(target).collapse('toggle');
 });
 
+function showAlert(message, type = 'success') {
+    var $alert = $('#alertTemplate').clone();
+    $alert.find('#alertMessage').text(message);
 
+    $alert.addClass('alert alert-dismissible fade show alert-' + type)
+        .removeClass('d-none');
+
+    $('#alerts-container').empty().append($alert);
+
+    setTimeout(function () {
+        $alert.alert('close');
+    }, 5000);
+}
