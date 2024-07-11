@@ -1,0 +1,10 @@
+# Enable URL rewriting
+RewriteEngine On
+
+# Disable directory browsing
+Options -Indexes
+
+# Rewrite rules to redirect all traffic to index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]

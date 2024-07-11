@@ -28,6 +28,7 @@ class Router
         ],
         'DELETE' => [
             '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@delete'],
+            '/post' => ['middleware' => 'auth', 'controller' => 'App\Controllers\PostController@delete'],
         ]
     ];
 
@@ -45,24 +46,36 @@ class Router
         $uri = $this->removeBaseUri($uri);
 
         // If request is POST always handle CSRF token
-        if (isset($this->routes[$method][$uri])) {
-            if ($method === 'POST') {
-                CSRFMiddleware::handle();
-            }
-
-            if (isset($this->routes[$method][$uri])) {
-                $route = $this->routes[$method][$uri];
-                if (is_array($route) && isset($route['middleware'])) {
-                    $this->handleMiddleware($route['middleware']);
-                    $this->callAction($route['controller']);
-                } else {
-                    $this->callAction($route);
-                }
-            } else {
-                http_response_code(404);
-                echo "404 Not Found";
-            }
+        if ($method === 'POST' && isset($this->routes[$method][$uri])) {
+            CSRFMiddleware::handle();
         }
+
+        // Match the route and extract the id for DELETE requests
+        if ($method === 'DELETE') {
+            $route = $this->matchRoute($uri, 'DELETE');
+            if ($route) {
+                $uriParts = explode('/', $uri);
+                $id = end($uriParts);
+
+                if (is_numeric($id)) {
+                    $this->handleMiddleware($route['middleware']);
+                    $this->callAction($route['controller'], ['id' => $id]);
+                    return;
+                }
+            }
+        } else if (isset($this->routes[$method][$uri])) {
+            $route = $this->routes[$method][$uri];
+            if (is_array($route) && isset($route['middleware'])) {
+                $this->handleMiddleware($route['middleware']);
+                $this->callAction($route['controller']);
+            } else {
+                $this->callAction($route);
+            }
+            return;
+        }
+
+        http_response_code(404);
+        echo "404 Not Found";
     }
 
     private function removeBaseUri($uri)
@@ -83,10 +96,26 @@ class Router
         }
     }
 
-    private function callAction($controllerAction)
+    private function callAction($controllerAction, $params = [])
     {
         list($controller, $action) = explode('@', $controllerAction);
         $controller = new $controller($this->db);
-        $controller->$action();
+
+        // Make sure params are passed as positional arguments
+        if (!empty($params)) {
+            call_user_func_array([$controller, $action], array_values($params));
+        } else {
+            $controller->$action();
+        }
+    }
+
+    private function matchRoute($uri, $method)
+    {
+        foreach ($this->routes[$method] as $route => $config) {
+            if (preg_match('#^' . preg_quote($route, '#') . '/\d+$#', $uri)) {
+                return $config;
+            }
+        }
+        return null;
     }
 }

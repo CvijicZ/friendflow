@@ -1,6 +1,5 @@
 vendor/
 config/
-.htaccess
 .env
 ignore.php
 TODO

@@ -12,6 +12,7 @@
         scrollbar-width: none;
     }
 </style>
+<meta name="csrf-token" content="<?= App\Middlewares\CSRFMiddleware::getToken(); ?>">
 
 <div class="container-fluid mt-1 vh-100 ">
 
@@ -25,7 +26,7 @@
                 <p><?= htmlspecialchars($data['auth_user']['name']) . " " . htmlspecialchars($data['auth_user']['surname']) ?>
                 </p>
                 <p><?= htmlspecialchars($data['auth_user']['email']) ?></p>
-                <p>Birthday: <?= htmlspecialchars($data['auth_user']['birthday'])?></p>
+                <p>Birthday: <?= htmlspecialchars($data['auth_user']['birthday']) ?></p>
             </div>
 
             <div class="suggestions">
@@ -70,7 +71,8 @@
                                         <input type="file" name="post_image" class="form-control-file d-none">
                                     </label>
                                 </div>
-                                <input type="hidden" name="csrf_token" value="<?= \App\Middlewares\CSRFMiddleware::getToken() ?>">
+                                <input type="hidden" name="csrf_token"
+                                    value="<?= \App\Middlewares\CSRFMiddleware::getToken() ?>">
                                 <button type="submit" class="btn btn-primary">Post</button>
                             </form>
 
@@ -83,7 +85,7 @@
             <!-- List of all posts -->
             <?php
             foreach ($data['posts'] as $post): ?>
-                <div class="card mb-3 w-auto bg-dark text-light">
+                <div class="card mb-3 w-auto bg-dark text-light" id="post-<?= $post['id'] ?>">
 
                     <div class="card-body">
                         <div class="media">
@@ -94,11 +96,14 @@
                                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <i class="fas fa-ellipsis-h"></i>
                                     </button>
-                                    <div class="dropdown-menu dropdown-menu-right"
+                                    <div class="dropdown-menu dropdown-menu-right text-center mx-auto bg-dark"
                                         aria-labelledby="dropdownMenuButton<?= $post['id'] ?>">
-                                        <a class="dropdown-item" href="#">Edit Post</a>
-                                        <a class="dropdown-item" href="#">Delete Post</a>
+                                        <button type="button" class="btn btn-outline-primary edit-btn"
+                                            data-post-id="<?= $post['id'] ?>">Edit</button>
+                                        <button type="button" class="btn btn-outline-danger delete-btn"
+                                            data-post-id="<?= $post['id'] ?>">Delete</button>
                                     </div>
+
                                 </div>
                             <?php endif; ?>
                             <img src="app/storage/images/post_images/<?= htmlspecialchars($post['image_name']) ?>"
@@ -202,78 +207,30 @@
 
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this post?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-<script>
-
-    $(document).ready(function () {
-        $('[data-toggle="collapse"]').on('click', function () {
-            var target = $(this).data('target');
-            $(target).collapse('toggle');
-        });
-    });
-
-    $(document).ready(function () {
-        const maxChats = 5;
-        const openChats = new Set();
-
-        function updateChatPositions() {
-            $('.chat-box').each(function (index) {
-                $(this).css('right', 20 + index * 320 + 'px');
-            });
-        }
-
-        $('.friend').on('click', function () {
-            var friendId = $(this).data('id');
-            var friendName = $(this).data('name');
-            var friendImage = $(this).find('img').attr('src');
-
-            if (openChats.has(friendId)) {
-                return;
-            }
-
-            if (openChats.size >= maxChats) {
-                alert('You can only open up to ' + maxChats + ' chat boxes.');
-                return;
-            }
-
-            openChats.add(friendId);
-
-            var chatBox = $(
-                '<div class="chat-box" data-id="' + friendId + '">' +
-                '<div class="chat-header">' +
-                '<div class="d-flex align-items-center">' +
-                '<img src="' + friendImage + '" alt="Friend">' +
-                '<span>' + friendName + '</span>' +
-                '</div>' +
-                '<div class="close-chat">&times;</div>' +
-                '</div>' +
-                '<div class="messages"></div>' +
-                '<input type="text" class="form-control" placeholder="Type a message...">' +
-                '<button class="btn btn-primary btn-sm mt-2 send-message">Send</button>' +
-                '</div>'
-            );
-            $('body').append(chatBox);
-            updateChatPositions();
-            chatBox.show();
-
-            chatBox.find('.close-chat').on('click', function () {
-                var chatBox = $(this).closest('.chat-box');
-                var friendId = chatBox.data('id');
-                openChats.delete(friendId);
-                chatBox.remove();
-                updateChatPositions();
-            });
-
-            chatBox.find('.send-message').on('click', function () {
-                var messageInput = chatBox.find('input');
-                var message = messageInput.val();
-                if (message) {
-                    chatBox.find('.messages').append('<div class="message">' + message + '</div>');
-                    messageInput.val('');
-                }
-            });
-        });
-    });
-</script>
+<script src="/friendflow/public/js/app.js"></script>

@@ -2,7 +2,9 @@
 
 namespace App\Validation;
 
-class PostValidation
+use App\Models\Post;
+
+class PostValidation extends Post
 {
     private $errors = [];
 
@@ -37,5 +39,11 @@ class PostValidation
             $this->errors['content'] = 'Incorrect content length.';
         }
 
+    }
+
+    public function usersPost($postId){
+       $post=$this->show($postId);
+
+       return $_SESSION['user_id'] === $post['user_id'];
     }
 }

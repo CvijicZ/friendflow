@@ -16,7 +16,7 @@ class PostController extends Controller
     {
         $db = new Database();
         $this->model = new Post($db->getConnection());
-        $this->validator = new PostValidation();
+        $this->validator = new PostValidation($db->getConnection());
 
     }
     public function create()
@@ -54,6 +54,23 @@ class PostController extends Controller
         }
 
         header("Location: /friendflow");
+        exit();
+    }
+
+    public function delete($id)
+    {
+        
+        header('Content-Type: application/json; charset=utf-8');
+        if ($this->validator->usersPost($id)) {
+
+            if ($this->model->destroy($id)) {
+                echo json_encode(['status' => "success", "message" => "Post deleted."]);
+                exit();
+            }
+            echo json_encode(['status' => "error", 'message' => "Could not find post to delete"]);
+            exit();
+        }
+        echo json_encode(['status' => "error", 'message' => "Insufficient permission"]);
         exit();
     }
 }
