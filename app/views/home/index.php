@@ -150,9 +150,10 @@
                                         <p>This is another comment content.</p>
                                     </div>
                                 </div>
-                                <div class="mt-3">
-                                    <textarea class="form-control" rows="2" placeholder="Add a comment..."></textarea>
-                                    <button class="btn btn-primary mt-2">Post Comment</button>
+                                <div class="mt-3" data-post-id="<?= $post['id'] ?>">
+                                    <textarea class="form-control comment-content" rows="2"
+                                        placeholder="Add a comment..."></textarea>
+                                    <button class="btn btn-primary mt-2 add-comment">Post Comment</button>
                                 </div>
                             </div>
                         </div>

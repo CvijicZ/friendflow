@@ -1,6 +1,37 @@
 
-// Delete post request
+
 $(document).ready(function () {
+
+    // Add comment
+    $(".add-comment").click(function () {
+        var postId = $(this).closest('div').data('post-id');
+        var content = $(this).closest('div').find('.comment-content').val();
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+        $.ajax({
+            url: '/friendflow/comment',
+            method: 'POST',
+            data: {
+                postId: postId,
+                content: content,
+                csrf_token: csrfToken
+            },
+            success: function (response) {
+                if (response.status == 'success') {
+                    showAlert("Comment created.");
+                }
+                if(response.status=='error'){
+                    showAlert(response.message, "danger");
+                }
+            },
+            error: function (xhr, status, error) {
+                // Handle error
+                console.error('Error occurred during delete:', error);
+            }
+        });
+    });
+
+    // Post delete
     var postIdToDelete;
 
     $(".delete-btn").click(function () {

@@ -22,6 +22,7 @@ class Router
             '/register' => 'App\Controllers\AuthController@register',
             '/updateProfile' => 'App\Controllers\UserController@updateProfile',
             '/post' => 'App\Controllers\PostController@create',
+            '/comment' => 'App\Controllers\CommentController@create',
         ],
         'PUT' => [
             '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@update'],
