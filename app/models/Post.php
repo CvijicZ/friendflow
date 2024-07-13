@@ -9,23 +9,33 @@ class Post
 {
     protected $db;
     private $userModel;
+    private $commentModel;
     public function __construct(PDO $db)
     {
         $this->db = $db;
         $this->userModel = new User($this->db);
+        $this->commentModel=new Comment($this->db);
     }
     public function index()
     {
         $sql = "SELECT * FROM posts ORDER BY created_at DESC";
         $stmt = $this->db->query($sql);
         $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+    
         foreach ($posts as &$post) {
             $post['user'] = $this->userModel->show($post['user_id']);
+            $comments = $this->commentModel->index($post['id']);
+            
+            foreach ($comments as &$comment) {
+                $comment['user'] = $this->userModel->show($comment['user_id']);
+            }
+    
+            $post['comments'] = $comments;
         }
-
+    
         return $posts;
     }
+    
     public function show($id)
     {
         $sql = "SELECT * FROM posts WHERE id=:id";

@@ -134,22 +134,20 @@
 
                         <div class="collapse" id="comments_<?= $post['id'] ?>">
                             <div class="card card-body mt-3 bg-dark text-light">
+
+                              <?php foreach($post['comments'] as $comment): ?>
+
                                 <div class="media mb-3">
                                     <img src="commenter1.jpg" class="mr-3 rounded-circle" alt="Commenter Profile"
                                         style="width:48px;height:48px;">
                                     <div class="media-body">
-                                        <h6 class="mt-0">Commenter Name</h6>
-                                        <p>This is a comment content.</p>
+                                        <h6 class="mt-0"><?= htmlspecialchars($comment['user']['name']) . " " . htmlspecialchars($comment['user']['surname']) ?></h6>
+                                        <p><?= htmlspecialchars($comment['content']) ?></p>
                                     </div>
                                 </div>
-                                <div class="media">
-                                    <img src="commenter2.jpg" class="mr-3 rounded-circle" alt="Commenter Profile"
-                                        style="width:48px;height:48px;">
-                                    <div class="media-body">
-                                        <h6 class="mt-0">Commenter Name</h6>
-                                        <p>This is another comment content.</p>
-                                    </div>
-                                </div>
+
+                                <?php endforeach; ?>
+
                                 <div class="mt-3" data-post-id="<?= $post['id'] ?>">
                                     <textarea class="form-control comment-content" rows="2"
                                         placeholder="Add a comment..."></textarea>
