@@ -102,4 +102,39 @@ class User
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
+
+    public function areFriends($userId1, $userId2)
+    {
+        $sql = "SELECT id FROM friends WHERE (user1_id = :userId1 AND user2_id = :userId2) OR (user1_id = :userId2 AND user2_id = :userId1);";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':userId1', $userId1);
+        $stmt->bindParam(':userId2', $userId2);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function sendFriendRequest($receiverId, $requestorId)
+    {
+        $sql = "INSERT INTO friend_requests(receiver_id, requestor_id) VALUES(:receiverId, :requestorId)";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':receiverId', $receiverId);
+        $stmt->bindParam(':requestorId', $requestorId);
+
+        return $stmt->execute();
+    }
+// TODO: instead of checking like this, I can sum id1 and id2 and find if it is possible to sum 2 numbers in requests table to get the same number
+    public function isFriendRequestSent($userId1, $userId2)
+    {
+        $sql = "SELECT status FROM friend_requests WHERE (requestor_id=:userId1 AND receiver_id=:userId2) OR (requestor_id=:userId2 AND receiver_id=:userId1)";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':userId1', $userId1);
+        $stmt->bindParam(':userId2', $userId2);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

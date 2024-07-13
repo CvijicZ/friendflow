@@ -2,6 +2,35 @@
 
 $(document).ready(function () {
 
+   // Add friend
+        $(".add-friend").click(function () {
+            var parentDiv = $(this).closest('.suggestion');
+            var receiverId = parentDiv.data('user-id');
+            var csrfToken = $('meta[name="csrf-token"]').attr('content');
+    
+            $.ajax({
+                url: '/friendflow/add-friend',
+                method: 'POST',
+                data: {
+                    receiverId: receiverId,
+                    csrf_token: csrfToken
+                },
+                success: function (response) {
+                    if (response.status == "success") {
+                        showAlert("Friend request sent");
+                        parentDiv.remove(); // Remove the parent div
+                    }
+                    if(response.status=="error"){
+                        showAlert(response.message, "danger");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Handle error
+                    console.error('Error occurred during delete:', error);
+                }
+            });
+        });
+
     // Add comment
     $(".add-comment").click(function () {
         var postId = $(this).closest('div').data('post-id');

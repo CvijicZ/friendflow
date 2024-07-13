@@ -35,12 +35,12 @@
                 <h4>Suggestions</h4>
                 <?php foreach ($data['all_users'] as $user): ?>
 
-                    <div class="suggestion mb-2">
+                    <div class="suggestion mb-2" data-user-id="<?= $user['id'] ?>">
                         <div class="d-flex align-items-center">
                             <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
                             <span><?= htmlspecialchars($user['name']) . " " . htmlspecialchars($user['surname']) ?></span>
                         </div>
-                        <button class="btn btn-primary btn-sm mt-2">Add Friend</button>
+                        <button class="btn btn-primary btn-sm mt-2 add-friend">Add Friend</button>
                     </div>
                 <?php endforeach; ?>
             </div>

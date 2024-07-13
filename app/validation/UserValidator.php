@@ -14,6 +14,25 @@ class UserValidator
         $this->userModel = $userModel;
     }
 
+    public function validateFriendRequest($receiverId, $requestorId)
+    {
+        if (empty($receiverId) || empty($requestorId)) {
+            $this->errors['friend_request'] = "User id missing in request";
+            return $this->errors;
+
+        }
+        if (!$this->userModel->show($receiverId)) {
+            $this->errors['friend_request'] = "Could not find user to send friend request";
+            return $this->errors;
+
+        }
+
+        if ($this->userModel->isFriendRequestSent($receiverId, $requestorId)) {
+            $this->errors['friend_request'] = "Friend request already exists";
+            return $this->errors;
+        }
+    }
+
     public function validateLogin(array $userInputs): array
     {
         $this->validateEmail($userInputs['email'], true);
@@ -49,7 +68,6 @@ class UserValidator
 
     function validateBirthDate($birthDate)
     {
-
         $components = explode('-', $birthDate);
 
         if (count($components) !== 3) {

@@ -23,6 +23,7 @@ class Router
             '/updateProfile' => 'App\Controllers\UserController@updateProfile',
             '/post' => 'App\Controllers\PostController@create',
             '/comment' => 'App\Controllers\CommentController@create',
+            '/add-friend' => 'App\Controllers\UserController@addFriend',
         ],
         'PUT' => [
             '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@update'],
