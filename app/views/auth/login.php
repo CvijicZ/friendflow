@@ -1,3 +1,9 @@
+<?php 
+if(App\Middlewares\AuthMiddleware::isLoggedIn()) {
+    header("Location: /friendflow/");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 

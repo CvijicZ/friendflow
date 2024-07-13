@@ -1,13 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-</head>
-
-<body>
+<?php 
+if(App\Middlewares\AuthMiddleware::isLoggedIn()) {
+    header("Location: /friendflow/");
+    exit();
+}
+?>
     <h1>Create your FREE profile!</h1>
     <form action="/friendflow/register" method="POST">
         <input type="text" name="name" placeholder="Name:" required>
@@ -40,6 +36,3 @@
         <input type="hidden" name="csrf_token" value="<?= \App\Middlewares\CSRFMiddleware::getToken() ?>">
         <button type="submit">Register</button>
     </form>
-</body>
-
-</html>
