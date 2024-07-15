@@ -10,7 +10,8 @@
             "App\\Controllers\\": "app/controllers/",
             "App\\Middleware\\": "app/middlewares/",
             "App\\Models\\": "app/models/",
-            "App\\Validation\\": "app/validation/"
+            "App\\Validation\\": "app/validation/",
+            "App\\Migrations\\": "app/migrations/"
         }
     }
 }
