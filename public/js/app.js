@@ -1,35 +1,108 @@
 
 
 $(document).ready(function () {
+    // AJAX function to fetch friend requests
+    $('#friendRequestsBtn').on('click', function () {
+        $('.friend-requests-container').empty();
 
-   // Add friend
-        $(".add-friend").click(function () {
-            var parentDiv = $(this).closest('.suggestion');
-            var receiverId = parentDiv.data('user-id');
-            var csrfToken = $('meta[name="csrf-token"]').attr('content');
-    
-            $.ajax({
-                url: '/friendflow/add-friend',
-                method: 'POST',
-                data: {
-                    receiverId: receiverId,
-                    csrf_token: csrfToken
-                },
-                success: function (response) {
-                    if (response.status == "success") {
-                        showAlert("Friend request sent");
-                        parentDiv.remove(); // Remove the parent div
-                    }
-                    if(response.status=="error"){
-                        showAlert(response.message, "danger");
-                    }
-                },
-                error: function (xhr, status, error) {
-                    // Handle error
-                    console.error('Error occurred during delete:', error);
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+        $.ajax({
+            url: '/friendflow/get-friend-requests',
+            type: 'POST',
+            data: {
+                csrf_token: csrfToken
+            },
+            success: function (response) {
+                if (response.status === "success") {
+                    appendFriendRequests(response.data);
+                    $('#friendRequestModal').modal('show');
+                } 
+                if(response.status=='error'){
+                    $('.friend-requests-container').html("<p>No friend requests");
+                    $('#friendRequestModal').modal('show');
                 }
-            });
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX error: ' + status + ' ' + error);
+                // Redirect to error page or handle error as needed
+                window.location.href = '/friendflow/error';
+            }
         });
+    });
+
+    // Function to create friend request HTML
+    function createFriendRequestElement(request) {
+         var html = `
+<div class="friend-request">
+    <div class="d-flex align-items-center justify-content-between w-100">
+        <div class="d-flex align-items-center">
+            <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
+            <span>${request.name} ${request.surname}</span>
+        </div>
+        <div class="ml-auto">
+            <div class="btn-group">
+                <button class="btn btn-success btn-sm">Accept</button>
+                <button class="btn btn-danger btn-sm ml-2">Remove</button>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-end ml-2">
+        <small class="text-muted">${request.datetime}</small>
+    </div>
+</div>
+    `;
+
+        // Create a container element to hold the HTML
+        var container = document.createElement('div');
+        container.innerHTML = html.trim();
+
+        // Set data attributes or IDs dynamically if needed
+        // Example: container.dataset.requestId = request.id;
+
+        return container.firstChild;
+    }
+
+    // Function to append friend requests to the container
+    function appendFriendRequests(data) {
+        var container = document.querySelector('.friend-requests-container');
+
+        data.forEach(function (request) {
+            var friendRequestElement = createFriendRequestElement(request);
+            container.appendChild(friendRequestElement);
+        });
+    }
+
+
+
+    // Add friend
+    $(".add-friend").click(function () {
+        var parentDiv = $(this).closest('.suggestion');
+        var receiverId = parentDiv.data('user-id');
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+        $.ajax({
+            url: '/friendflow/add-friend',
+            method: 'POST',
+            data: {
+                receiverId: receiverId,
+                csrf_token: csrfToken
+            },
+            success: function (response) {
+                if (response.status == "success") {
+                    showAlert("Friend request sent");
+                    parentDiv.remove(); // Remove the parent div
+                }
+                if (response.status == "error") {
+                    showAlert(response.message, "danger");
+                }
+            },
+            error: function (xhr, status, error) {
+                // Handle error
+                console.error('Error occurred during delete:', error);
+            }
+        });
+    });
 
     // Add comment
     $(".add-comment").click(function () {
@@ -49,7 +122,7 @@ $(document).ready(function () {
                 if (response.status == 'success') {
                     showAlert("Comment created.");
                 }
-                if(response.status=='error'){
+                if (response.status == 'error') {
                     showAlert(response.message, "danger");
                 }
             },

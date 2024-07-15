@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Core\Database;
 use App\Core\Flash;
 use App\Validation\UserValidator;
+use App\Middlewares\AuthMiddleware;
 
 class UserController extends Controller
 {
@@ -17,24 +18,64 @@ class UserController extends Controller
     {
         $db = new Database();
         $this->userModel = new User($db->getConnection());
-        $this->validator=new UserValidator($this->userModel);
+        $this->validator = new UserValidator($this->userModel);
 
     }
 
-    public function addFriend(){
+    public function countFriendRequests()
+    {
         header('Content-Type: application/json; charset=utf-8');
 
-        $receiverId=$_POST['receiverId'];
-        $error=$this->validator->validateFriendRequest($receiverId, $_SESSION['user_id']);
-
-        if(empty($error)){
-
-          if($this->userModel->sendFriendRequest($receiverId, $_SESSION['user_id'])){
-            echo json_encode(['status' => "success", "message" => "Friend request sent."]);
+        $result = $this->userModel->countFriendRequests($_SESSION['user_id']);
+      
+            echo json_encode(['status' => "success", "number_of_requests" => $result]);
             exit();
-          }
-          echo json_encode(['status' => "error", "message" => "Can't send friend request, try again later."]);
-          exit();
+      
+        }
+
+    public function getFriendRequests()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        AuthMiddleware::handle();
+
+        $result = $this->userModel->getFriendRequests($_SESSION['user_id']);
+        if ($result) {
+            $dataToReturn = [];
+
+            foreach ($result as $row) {
+                $requestorDetails = $this->userModel->show($row['requestor_id']);
+
+                $requestData = [
+                    'name' => $requestorDetails['name'],
+                    'surname' => $requestorDetails['surname'],
+                    'datetime' => $row['date']
+                ];
+                $dataToReturn[] = $requestData;
+            }
+            echo json_encode(['status' => "success", "data" => $dataToReturn]);
+            exit();
+        } else {
+            echo json_encode(['status' => "error", "message" => "No friend requests"]);
+            exit();
+        }
+    }
+
+    public function addFriend()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $receiverId = $_POST['receiverId'];
+        $error = $this->validator->validateFriendRequest($receiverId, $_SESSION['user_id']);
+
+        if (empty($error)) {
+
+            if ($this->userModel->sendFriendRequest($receiverId, $_SESSION['user_id'])) {
+                echo json_encode(['status' => "success", "message" => "Friend request sent."]);
+                exit();
+            }
+            echo json_encode(['status' => "error", "message" => "Can't send friend request, try again later."]);
+            exit();
         }
         echo json_encode(['status' => "error", "message" => $error['friend_request']]);
         exit();

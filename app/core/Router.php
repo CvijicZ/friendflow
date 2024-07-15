@@ -24,6 +24,8 @@ class Router
             '/post' => 'App\Controllers\PostController@create',
             '/comment' => 'App\Controllers\CommentController@create',
             '/add-friend' => 'App\Controllers\UserController@addFriend',
+            '/get-friend-requests' => 'App\Controllers\UserController@getFriendRequests',
+            '/count-friend-requests' => 'App\Controllers\UserController@countFriendRequests',
         ],
         'PUT' => [
             '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@update'],
@@ -47,7 +49,7 @@ class Router
     {
         $uri = $this->removeBaseUri($uri);
 
-        if ($method === 'POST' && isset($this->routes[$method][$uri])) {
+        if ($method == 'POST' && isset($this->routes[$method][$uri])) {
             CSRFMiddleware::handle();
         }
 

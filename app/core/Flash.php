@@ -7,7 +7,9 @@ class Flash
     public static function set($key, $message)
     {
         if (!isset($_SESSION)) {
-            session_start();
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
         }
         if (!isset($_SESSION['flash_messages'][$key])) {
             $_SESSION['flash_messages'][$key] = [];
@@ -18,7 +20,9 @@ class Flash
     public static function get($key)
     {
         if (!isset($_SESSION)) {
-            session_start();
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
         }
         if (isset($_SESSION['flash_messages'][$key])) {
             $messages = $_SESSION['flash_messages'][$key];

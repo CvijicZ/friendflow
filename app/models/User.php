@@ -137,4 +137,30 @@ class User
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function getFriendRequests($userId){
+        $sql="SELECT * FROM friend_requests WHERE receiver_id=:userId";
+
+        $stmt=$this->db->prepare($sql);
+        $stmt->bindParam(':userId', $userId);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countFriendRequests($userId){
+        $sql = "SELECT COUNT(*) AS requestCount FROM friend_requests WHERE receiver_id = :userId";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':userId', $userId);
+        $stmt->execute();
+    
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        if ($result && isset($result['requestCount'])) {
+            return (int) $result['requestCount'];
+        } else {
+            return 0;
+        }
+    }
 }

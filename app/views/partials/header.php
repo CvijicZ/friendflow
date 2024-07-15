@@ -21,6 +21,10 @@
 
             <?php if (\App\Middlewares\AuthMiddleware::isLoggedIn()): ?>
                 <div class="d-flex ml-auto">
+                    <button type="button" class="btn btn-outline-primary mr-2 position-relative" id="friendRequestsBtn">
+                        Friend requests
+                        <span class="badge badge-danger badge-pill" id="friendRequestsNumber" style="position: absolute; top: -5px; right: -5px;">0</span>
+                    </button>
 
                     <a href="/friendflow/" class="btn btn-outline-primary mr-2">Home</a>
                     <a href="/friendflow/profile" class="btn btn-outline-primary mr-2">Profile</a>
@@ -59,3 +63,34 @@
         <?php endforeach; ?>
     <?php endif; ?>
     <!-- End of flash messages -->
+
+    <?php if (\App\Middlewares\AuthMiddleware::isLoggedIn()): ?>
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script>
+
+$(document).ready(function () {  // TODO: Create web sockets or SSE to display this instead of calling it every 10 seconds
+    function fetchFriendRequestsCount() {
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+        $.ajax({
+            url: '/friendflow/count-friend-requests',
+            type: 'POST',
+            data: {
+                csrf_token: csrfToken
+            },
+            success: function (response) {
+                if (response.status === "success") {
+                    $('#friendRequestsNumber').text(response.number_of_requests);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX error: ' + status + ' ' + error);
+            }
+        });
+    }
+
+    fetchFriendRequestsCount();
+    setInterval(fetchFriendRequestsCount, 10000);
+});
+</script>
+    <?php endif; ?>

@@ -135,16 +135,18 @@
                         <div class="collapse" id="comments_<?= $post['id'] ?>">
                             <div class="card card-body mt-3 bg-dark text-light">
 
-                              <?php foreach($post['comments'] as $comment): ?>
+                                <?php foreach ($post['comments'] as $comment): ?>
 
-                                <div class="media mb-3">
-                                    <img src="commenter1.jpg" class="mr-3 rounded-circle" alt="Commenter Profile"
-                                        style="width:48px;height:48px;">
-                                    <div class="media-body">
-                                        <h6 class="mt-0"><?= htmlspecialchars($comment['user']['name']) . " " . htmlspecialchars($comment['user']['surname']) ?></h6>
-                                        <p><?= htmlspecialchars($comment['content']) ?></p>
+                                    <div class="media mb-3">
+                                        <img src="commenter1.jpg" class="mr-3 rounded-circle" alt="Commenter Profile"
+                                            style="width:48px;height:48px;">
+                                        <div class="media-body">
+                                            <h6 class="mt-0">
+                                                <?= htmlspecialchars($comment['user']['name']) . " " . htmlspecialchars($comment['user']['surname']) ?>
+                                            </h6>
+                                            <p><?= htmlspecialchars($comment['content']) ?></p>
+                                        </div>
                                     </div>
-                                </div>
 
                                 <?php endforeach; ?>
 
@@ -228,6 +230,27 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Friend requests modal -->
+<div class="modal fade" id="friendRequestModal" tabindex="-1" role="dialog" aria-labelledby="friendRequestModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="friendRequestModalLabel">Friend Request</h5>
+            </div>
+            <div class="modal-body">
+
+                <div class="friend-requests-container">
+                    <div class="friend-request">
+
+                
+                </div>
+
             </div>
         </div>
     </div>
