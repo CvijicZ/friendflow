@@ -1,8 +1,15 @@
-*** 1. INSTALLATION ***
+*** 1. REQUIERMENTS ***
+   1. Apache and MySQL web servers.
+   2. Composer dependency manager.
+   3. Git software
+
+*** 2. INSTALLATION ***
   - To properly install and run the app, you need to:
 
-  *** Downloading project ***
-  - To download source code, you just need to git clone the project
+  *** Download the project ***
+  - To download source code, you just need to git clone the project. Command `git clone https://github.com/CvijicZ/friendflow.git`
+     - Just make sure that you run command above in the folder where your server will be looking for it (htdocs on xampp)
+  - After you cloned the project, do not forget to run ** `composer install` ** to install dependencies.
 
   *** Setting up database and it's tables ***
     1. Start your DBMS (mysql server)

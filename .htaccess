@@ -8,3 +8,6 @@ Options -Indexes
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Deny access to migrate.php
+RewriteRule ^migrate.php - [F]
