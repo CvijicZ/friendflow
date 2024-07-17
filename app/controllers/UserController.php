@@ -22,6 +22,18 @@ class UserController extends Controller
 
     }
 
+    public function acceptFriendRequest(){ // TODO: Add validation to check if receiver_id is equal to $_SESION user_id
+        header('Content-Type: application/json; charset=utf-8');
+
+        $result=$this->userModel->acceptFriendRequest($_POST['friendRequestId']);
+        if($result){
+            echo json_encode(['status' => "success", "message" => "Friend request accepted."]);
+            exit();
+        }
+        echo json_encode(['status' => "error", "message" => "Something went wrong."]);
+        exit();
+    }
+
     public function countFriendRequests()
     {
         header('Content-Type: application/json; charset=utf-8');
@@ -47,6 +59,7 @@ class UserController extends Controller
                 $requestorDetails = $this->userModel->show($row['requestor_id']);
 
                 $requestData = [
+                    'id' => $row['id'],
                     'name' => $requestorDetails['name'],
                     'surname' => $requestorDetails['surname'],
                     'datetime' => $row['date']

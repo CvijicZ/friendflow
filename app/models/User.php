@@ -163,4 +163,40 @@ class User
             return 0;
         }
     }
+    public function acceptFriendRequest($friendRequestId){
+       
+        $this->db->beginTransaction();
+
+        try {
+        
+            $sql = "SELECT * FROM friend_requests WHERE id = :friendRequestId";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':friendRequestId', $friendRequestId);
+            $stmt->execute();
+            $friendRequest = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+        
+            $sql = "UPDATE friend_requests SET status = :status WHERE id = :friendRequestId";
+            $stmt = $this->db->prepare($sql);
+            $status = "accepted";
+            $stmt->bindParam(':friendRequestId', $friendRequestId);
+            $stmt->bindParam(':status', $status);
+            $stmt->execute();
+            $stmt->closeCursor();
+        
+            $stmt = $this->db->prepare("INSERT INTO friends (requestor_id, receiver_id, friendshipType) VALUES (:requestor_id, :receiver_id, :friendshipType)");
+            $friendshipType = 'friends';
+            $stmt->bindParam(':requestor_id', $friendRequest['requestor_id']);
+            $stmt->bindParam(':receiver_id', $friendRequest['receiver_id']);
+            $stmt->bindParam(':friendshipType', $friendshipType);
+            $stmt->execute();
+
+            $this->db->commit();
+            return true;
+        
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            echo $e->getMessage();
+        }
+    }
 }

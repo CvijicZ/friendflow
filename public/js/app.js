@@ -17,8 +17,8 @@ $(document).ready(function () {
                 if (response.status === "success") {
                     appendFriendRequests(response.data);
                     $('#friendRequestModal').modal('show');
-                } 
-                if(response.status=='error'){
+                }
+                if (response.status == 'error') {
                     $('.friend-requests-container').html("<p>No friend requests");
                     $('#friendRequestModal').modal('show');
                 }
@@ -33,8 +33,8 @@ $(document).ready(function () {
 
     // Function to create friend request HTML
     function createFriendRequestElement(request) {
-         var html = `
-<div class="friend-request">
+        var html = `
+<div class="friend-request" data-friend-request-id="${request.id}">
     <div class="d-flex align-items-center justify-content-between w-100">
         <div class="d-flex align-items-center">
             <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
@@ -42,8 +42,8 @@ $(document).ready(function () {
         </div>
         <div class="ml-auto">
             <div class="btn-group">
-                <button class="btn btn-success btn-sm">Accept</button>
-                <button class="btn btn-danger btn-sm ml-2">Remove</button>
+                <button class="btn btn-success btn-sm accept-friend-request">Accept</button>
+                <button class="btn btn-danger btn-sm ml-2 deny-friend-request">Remove</button>
             </div>
         </div>
     </div>
@@ -73,7 +73,43 @@ $(document).ready(function () {
         });
     }
 
+    $('.friend-requests-container').on('click', '.deny-friend-request', function(){
+        console.log("aaa");
+    });
+    // Accept friend request
+    $('.friend-requests-container').on('click', '.accept-friend-request', function () {
 
+        let csrfToken = $('meta[name="csrf-token"]').attr('content');
+        let friendRequestId = $(this).closest('.friend-request').data('friend-request-id');
+
+        if(csrfToken === undefined || friendRequestId===undefined){
+            console.log('Something went wrong'); // TODO: display error to the user
+            return;
+        }
+
+        $.ajax({
+            url: '/friendflow/accept-friend-request',
+            method: 'POST',
+            data: {
+                friendRequestId: friendRequestId,
+                csrf_token: csrfToken
+            },
+            success: function (response) {
+                console.log(response);
+                // if (response.status == "success") {
+                //     showAlert("Friend request sent");
+                //     parentDiv.remove(); // Remove the parent div
+                // }
+                // if (response.status == "error") {
+                //     showAlert(response.message, "danger");
+                // }
+            },
+            error: function (xhr, status, error) {
+                // Handle error
+                console.error('Error occurred during delete:', error);
+            }
+        });
+    });
 
     // Add friend
     $(".add-friend").click(function () {
