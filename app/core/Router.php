@@ -18,15 +18,18 @@ class Router
             '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@editProfile'],
         ],
         'POST' => [
+            // Auth requests
             '/login' => 'App\Controllers\AuthController@login',
             '/register' => 'App\Controllers\AuthController@register',
+            // User requests
             '/updateProfile' => 'App\Controllers\UserController@updateProfile',
             '/post' => 'App\Controllers\PostController@create',
             '/comment' => 'App\Controllers\CommentController@create',
-            '/add-friend' => 'App\Controllers\UserController@addFriend',
-            '/get-friend-requests' => 'App\Controllers\UserController@getFriendRequests',
-            '/count-friend-requests' => 'App\Controllers\UserController@countFriendRequests',
-            '/accept-friend-request' => 'App\Controllers\UserController@acceptFriendRequest',
+            // HTTP requests related to the friend requests
+            '/add-friend' => 'App\Controllers\FriendsController@addFriend',
+            '/get-friend-requests' => 'App\Controllers\FriendsController@getFriendRequests',
+            '/count-friend-requests' => 'App\Controllers\FriendsController@countFriendRequests',
+            '/accept-friend-request' => 'App\Controllers\FriendsController@acceptFriendRequest',
         ],
         'PUT' => [
             '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@update'],
