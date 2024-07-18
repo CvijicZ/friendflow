@@ -1,6 +1,43 @@
 
 
 $(document).ready(function () {
+    // Get all friends
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+    $.ajax({
+        url: '/friendflow/get-all-friends',
+        type: 'POST',
+        data: {
+            csrf_token: csrfToken
+        },
+        success: function (response) {
+            if (response.status === "success") {
+
+                response.data.forEach(friend => {
+                    const friendDiv = `
+                        <div class="friend mb-2" data-id="${friend.id}" data-name="${friend.name + " " + friend.surname}">
+                            <div class="d-flex align-items-center">
+                                <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
+                                <span>${friend.name + " " + friend.surname}</span><span class="status-dot"></span>
+                            </div>
+                        </div>
+                    `;
+                    $('.chat').append(friendDiv);
+                });
+            }
+            if (response.status == 'error') {
+                const errorMessage='<p>' + response.message + '</p>'
+               $('.chat').append(errorMessage);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('AJAX error: ' + status + ' ' + error);
+        }
+    });
+    
+ 
+
+
     // AJAX function to fetch friend requests
     $('#friendRequestsBtn').on('click', function () {
         $('.friend-requests-container').empty();
@@ -26,7 +63,7 @@ $(document).ready(function () {
             error: function (xhr, status, error) {
                 console.error('AJAX error: ' + status + ' ' + error);
                 // Redirect to error page or handle error as needed
-                window.location.href = '/friendflow/error';
+                // window.location.href = '/friendflow/error';
             }
         });
     });
@@ -248,7 +285,7 @@ $(document).ready(function () {
     });
 });
 
-// Other app logic
+// Chat
 $(document).ready(function () {
     const maxChats = 5;
     const openChats = new Set();
@@ -259,7 +296,7 @@ $(document).ready(function () {
         });
     }
 
-    $('.friend').on('click', function () {
+    $('body').on('click', '.friend', function () {
         var friendId = $(this).data('id');
         var friendName = $(this).data('name');
         var friendImage = $(this).find('img').attr('src');
@@ -289,11 +326,12 @@ $(document).ready(function () {
             '<button class="btn btn-primary btn-sm mt-2 send-message">Send</button>' +
             '</div>'
         );
+
         $('body').append(chatBox);
         updateChatPositions();
         chatBox.show();
 
-        chatBox.find('.close-chat').on('click', function () {
+        chatBox.on('click', '.close-chat', function () {
             var chatBox = $(this).closest('.chat-box');
             var friendId = chatBox.data('id');
             openChats.delete(friendId);
@@ -301,7 +339,7 @@ $(document).ready(function () {
             updateChatPositions();
         });
 
-        chatBox.find('.send-message').on('click', function () {
+        chatBox.on('click', '.send-message', function () {
             var messageInput = chatBox.find('input');
             var message = messageInput.val();
             if (message) {
@@ -311,6 +349,7 @@ $(document).ready(function () {
         });
     });
 });
+
 
 $('[data-toggle="collapse"]').on('click', function () {
     var target = $(this).data('target');

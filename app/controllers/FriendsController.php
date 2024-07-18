@@ -23,6 +23,29 @@ class FriendsController extends Controller
         $this->validator = new FriendsValidation($this->friendsModel, $this->userModel);
     }
 
+    public function getAllFriends()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        AuthMiddleware::handle();
+
+        $friendsIds = $this->friendsModel->getAllFriends($_SESSION['user_id']);
+
+        $allFriendsInfo = [];
+
+        foreach ($friendsIds as $friendId) {
+            $userInfo = $this->userModel->show($friendId['friend_id']);
+            $allFriendsInfo[] = $userInfo;
+        }
+
+        if ($allFriendsInfo) {
+            echo json_encode(['status' => "success", "data" => $allFriendsInfo]);
+            exit();
+        }
+        echo json_encode(['status' => "error", "message" => "No friends found."]);
+        exit();
+    }
+
     public function addFriend()
     {
         header('Content-Type: application/json; charset=utf-8');

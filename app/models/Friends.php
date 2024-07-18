@@ -130,4 +130,22 @@ class Friends
 
         return $stmt->execute();
     }
+
+    public function getAllFriends($userId) {
+        $sql = "SELECT
+            CASE 
+                WHEN requestor_id = :userId THEN receiver_id 
+                ELSE requestor_id 
+            END AS friend_id
+        FROM 
+            friends
+        WHERE 
+            requestor_id = :userId OR receiver_id = :userId;";
+    
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+    
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

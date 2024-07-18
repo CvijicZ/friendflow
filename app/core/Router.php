@@ -30,6 +30,7 @@ class Router
             '/get-friend-requests' => 'App\Controllers\FriendsController@getFriendRequests',
             '/count-friend-requests' => 'App\Controllers\FriendsController@countFriendRequests',
             '/accept-friend-request' => 'App\Controllers\FriendsController@acceptFriendRequest',
+            '/get-all-friends' => 'App\Controllers\FriendsController@getAllFriends',
         ],
         'PUT' => [
             '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@update'],
