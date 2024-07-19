@@ -29,6 +29,7 @@
                 </p>
                 <p><?= htmlspecialchars($data['auth_user']['email']) ?></p>
                 <p>Birthday: <?= htmlspecialchars($data['auth_user']['birthday']) ?></p>
+                <input type="hidden" id="auth-user-id" value="<?= $data['auth_user']['id'] ?>">
             </div>
 
             <div class="suggestions">
@@ -217,3 +218,60 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script src="/friendflow/public/js/app.js"></script>
+
+    <script>
+$(function() {
+    // Function to get cookie value by name
+    function getCookie(name) {
+        let value = `; ${document.cookie}`;
+        let parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    let userId = $('#auth-user-id').val();
+    let token = getCookie('jwtToken'); // Function to get the cookie value
+
+    if (!token) {
+        console.error("JWT token not found in cookies");
+        return;
+    }
+
+    // Create WebSocket with token included in the query parameters
+    let websocket = new WebSocket(`ws://192.168.1.9:8080/chat?token=${encodeURIComponent(token)}&user_id=${userId}`);
+
+    websocket.onopen = function() {
+        console.log("WebSocket connection established.");
+    };
+
+    websocket.onmessage = function(event) {
+        var message = event.data;
+        console.log("Message received: " + message);
+        // Handle message display or processing
+    };
+
+    websocket.onerror = function(event) {
+    // Log the entire event object to get detailed information
+    console.error("WebSocket error:", event);
+    if (event.message) {
+        console.error("Error message:", event.message);
+    }
+};
+
+    websocket.onclose = function() {
+        console.log("WebSocket connection closed.");
+    };
+
+    // Function to send message
+    function sendMessage(toUserId, messageContent) {
+        var message = {
+            to: toUserId,
+            message: messageContent
+        };
+        websocket.send(JSON.stringify(message));
+    }
+});
+</script>
+
+
+

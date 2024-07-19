@@ -1,7 +1,11 @@
 <?php
+
 namespace App\Middlewares;
-class AuthMiddleware {
-    public static function handle() {
+
+class AuthMiddleware
+{
+    public static function handle()
+    {
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
@@ -11,7 +15,8 @@ class AuthMiddleware {
         }
     }
 
-    public static function isLoggedIn() {
+    public static function isLoggedIn()
+    {
         return isset($_SESSION['user_id']);
     }
 }

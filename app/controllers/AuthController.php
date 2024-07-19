@@ -7,14 +7,66 @@ use App\Models\User;
 use App\Core\Database;
 use App\Validation\UserValidator;
 use App\Core\Flash;
+use App\Services\JWTService;
 
 class AuthController extends Controller
 {
     protected $db;
+    private $jwt;
 
     public function __construct(Database $db)
     {
         $this->db = $db->getConnection();
+        $this->jwt=new JWTService();
+    }
+    public function login()
+    {
+        $email = trim($_POST['email'] ?? '');
+        $password = trim($_POST['password'] ?? '');
+
+        $validator = new UserValidator(new User($this->db));
+        $errors = $validator->validateLogin([
+            "email" => $email,
+            "password" => $password
+        ]);
+
+        $userModel = new User($this->db);
+        $user = $userModel->findByEmail($email);
+
+        if (!$validator->hasErrors()) {
+            if ($user && password_verify($password, $user->password)) {
+
+                // Set session user_id
+                $_SESSION['user_id'] = $user->id;
+
+                // Generate JWT token
+                $token = $this->jwt->generateToken($user->id);
+
+                // Set the JWT token in a cookie
+                setcookie('jwtToken', $token, [
+                    'expires' => time() + 3600, // Cookie expiration time
+                    'path' => '/', // Cookie path
+                    'domain' => '', // Cookie domain (leave empty for default)
+                    'secure' => false, // Only send cookie over HTTPS
+                    'httponly' => false, // Allows JS access, maybe there is a better way
+                    'samesite' => 'Lax' // CSRF protection
+                ]);
+
+                // Redirect to the homepage or another secure page
+                header('Location: /friendflow');
+                exit();
+            } else {
+                Flash::set('error', 'Invalid email or password.');
+                header('Location: /friendflow/login');
+                exit();
+            }
+        } else {
+            foreach ($errors as $error) {
+                Flash::set('error', $error);
+            }
+            header("Location: /friendflow/login");
+            exit();
+        }
     }
 
     public function showRegisterForm()
@@ -37,39 +89,7 @@ class AuthController extends Controller
         header('Location: /friendflow/');
         exit();
     }
-    public function login()
-    {
-        $email = trim($_POST['email'] ?? '');
-        $password = trim($_POST['password'] ?? '');
-
-        $validator = new UserValidator(new User($this->db));
-        $errors = $validator->validateLogin([
-            "email" => $email,
-            "password" => $password
-        ]);
-
-        $userModel = new User($this->db);
-        $user = $userModel->findByEmail($email);
-
-        if (!$validator->hasErrors()) {
-            if ($user && password_verify($password, $user->password)) {
-                $_SESSION['user_id'] = $user->id;
-
-                header('Location: /friendflow');
-                exit();
-            } else {
-                Flash::set('error', 'Invalid email or password.');
-                header('Location: /friendflow/login');
-                exit();
-            }
-        } else {
-            foreach ($errors as $error) {
-                Flash::set('error', $error);
-            }
-            header("Location: /friendflow/login");
-            exit();
-        }
-    }
+   
     public function register()
     {
 
