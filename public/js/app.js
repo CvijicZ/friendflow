@@ -321,14 +321,12 @@ $(document).ready(function () {
         // Find the chat box for the sender
         let chatBox = $(`.chat-box[data-id="${senderId}"]`);
 
-        // Check if the chat box is visible
         if (chatBox.is(':visible')) {
             showMessage(chatBox, message, senderId, senderName, senderImage);
         }
     };
 
     websocket.onerror = function (event) {
-        // Log the entire event object to get detailed information
         console.error("WebSocket error:", event);
         if (event.message) {
             console.error("Error message:", event.message);
@@ -349,76 +347,191 @@ $(document).ready(function () {
     }
 
 
-    // Passive chat logic
-    const maxChats = 5;
-    const openChats = new Set();
+    $(document).ready(function () {
+        const maxChats = 5;
+        const openChats = new Set();
 
-    function updateChatPositions() {
-        $('.chat-box').each(function (index) {
-            $(this).css('right', 20 + index * 320 + 'px');
-        });
-    }
-
-    $('body').on('click', '.friend', function () {
-        let friendId = $(this).data('id');
-        let friendName = $(this).data('name');
-        let friendImage = $(this).find('img').attr('src');
-
-        if (openChats.has(friendId)) {
-            return;
+        function updateChatPositions() {
+            $('.chat-box').each(function (index) {
+                $(this).css('right', 20 + index * 320 + 'px');
+            });
         }
 
-        if (openChats.size >= maxChats) {
-            alert('You can only open up to ' + maxChats + ' chat boxes.');
-            return;
+        // Function to load messages via AJAX
+        function loadMessages(chatBox, friendId, userId, prepend = false) {
+            let limit = 10;
+            let offset = chatBox.find('.message').length;
+            let csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+            let friendName = chatBox.find('#chat-friend-name').text();
+            let friendImage = "https://via.placeholder.com/40";
+
+            let scrollTop = chatBox.find('.messages').scrollTop();
+            let initialHeight = chatBox.find('.messages')[0].scrollHeight;
+
+            $.ajax({
+                url: '/friendflow/get-friend-messages',
+                method: 'POST',
+                data: {
+                    user_id: userId,
+                    friend_id: friendId,
+                    limit: limit,
+                    offset: offset,
+                    csrf_token: csrfToken
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status === 'success') {
+                        let userMessages = data.messages.user_messages;
+                        let friendMessages = data.messages.friend_messages;
+
+                        let allMessages = userMessages.concat(friendMessages);
+
+                        allMessages.sort(function (a, b) {
+                            return new Date(a.created_at) - new Date(b.created_at);
+                        });
+
+                        // Function to display messages
+                        function appendMessages(messages, prepend) {
+                            if (prepend) {
+                                // Reverse the order of new messages for prepending
+                                messages.reverse();
+                            }
+
+                            messages.forEach(function (message) {
+                                showMessage(
+                                    chatBox,
+                                    message.content,
+                                    message.sender_id === userId ? userId : friendId,
+                                    message.sender_id === userId ? 'You' : friendName,
+                                    message.sender_id === userId ? "https://via.placeholder.com/40" : friendImage,
+                                    prepend
+                                );
+                            });
+                        }
+
+                        if (prepend) {
+                            appendMessages(allMessages, true);
+
+                            // Restore the scroll position after messages are prepended
+                            let newHeight = chatBox.find('.messages')[0].scrollHeight;
+                            chatBox.find('.messages').scrollTop(newHeight - initialHeight + scrollTop);
+                        } else {
+                            appendMessages(allMessages, false);
+                            chatBox.find('.messages').scrollTop(chatBox.find('.messages')[0].scrollHeight);
+                        }
+                    } else {
+                        console.error(data.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('AJAX Error:', error);
+                }
+            });
         }
 
-        openChats.add(friendId);
-
-        let chatBox = $(
-            '<div class="chat-box" data-id="' + friendId + '">' +
-            '<div class="chat-header">' +
-            '<div class="d-flex align-items-center">' +
-            '<img src="' + friendImage + '" alt="Friend">' +
-            '<span>' + friendName + '</span>' +
-            '</div>' +
-            '<div class="close-chat">&times;</div>' +
-            '</div>' +
-            '<div class="messages"></div>' +
-            '<input type="text" class="form-control" placeholder="Type a message...">' +
-            '<button class="btn btn-primary btn-sm mt-2 send-message">Send</button>' +
-            '</div>'
-        );
-
-        $('body').append(chatBox);
-        updateChatPositions();
-        chatBox.show();
-
-        chatBox.on('click', '.close-chat', function () {
+        // Detect scroll event for loading older messages
+        $('body').on('scroll', '.messages', function () {
             let chatBox = $(this).closest('.chat-box');
+            let scrollTop = $(this).scrollTop();
             let friendId = chatBox.data('id');
-            openChats.delete(friendId);
-            chatBox.remove();
-            updateChatPositions();
-        });
-
-        chatBox.on('click', '.send-message', function () {
-            let messageInput = chatBox.find('input');
             let userId = $('#auth-user-id').val();
-            let userName = $('#auth-user-name').val();
-            let receiverId = chatBox.data('id');
-            let message = messageInput.val();
-            let userImage = "https://via.placeholder.com/40";
 
-            if (message) {
-                sendMessage(receiverId, message);
-                showMessage(chatBox, message, userId, userName, userImage);
-                messageInput.val('');
+            if (scrollTop === 0) {
+                loadMessages(chatBox, friendId, userId, true);
             }
         });
+
+        $('body').on('click', '.friend', function () {
+            let friendId = $(this).data('id');
+            let friendName = $(this).data('name');
+            let friendImage = $(this).find('img').attr('src');
+
+            if (openChats.has(friendId)) {
+                return;
+            }
+
+            if (openChats.size >= maxChats) {
+                alert('You can only open up to ' + maxChats + ' chat boxes.');
+                return;
+            }
+
+            openChats.add(friendId);
+
+            let chatBox = $(
+                '<div class="chat-box" data-id="' + friendId + '">' +
+                '<div class="chat-header">' +
+                '<div class="d-flex align-items-center">' +
+                '<img src="' + friendImage + '" alt="Friend">' +
+                '<span id="chat-friend-name">' + friendName + '</span>' +
+                '</div>' +
+                '<div class="close-chat">&times;</div>' +
+                '</div>' +
+                '<div class="messages"></div>' +
+                '<input type="text" class="form-control" placeholder="Type a message...">' +
+                '<button class="btn btn-primary btn-sm mt-2 send-message">Send</button>' +
+                '</div>'
+            );
+
+            $('body').append(chatBox);
+            updateChatPositions();
+            chatBox.show();
+
+            loadMessages(chatBox, friendId, $('#auth-user-id').val());
+
+            chatBox.on('click', '.close-chat', function () {
+                let chatBox = $(this).closest('.chat-box');
+                let friendId = chatBox.data('id');
+                openChats.delete(friendId);
+                chatBox.remove();
+                updateChatPositions();
+            });
+
+            chatBox.on('click', '.send-message', function () {
+                let messageInput = chatBox.find('input');
+                let userId = $('#auth-user-id').val();
+                let userName = $('#auth-user-name').val();
+                let receiverId = chatBox.data('id');
+                let message = messageInput.val();
+                let userImage = "https://via.placeholder.com/40";
+
+                if (message) {
+                    sendMessage(receiverId, message);
+                    showMessage(chatBox, message, userId, userName, userImage);
+                    messageInput.val('');
+                }
+            });
+
+            // Attach scroll event to the messages div within the newly created chat box
+            chatBox.find('.messages').on('scroll', function () {
+                let scrollTop = $(this).scrollTop();
+
+                if (scrollTop === 0) {
+                    loadMessages(chatBox, friendId, $('#auth-user-id').val(), true);
+                }
+            });
+        });
+
+        function showMessage(chatBox, messageContent, senderId, senderName, senderImage, prepend = false) {
+            let isCurrentUser = senderId === $('#auth-user-id').val();
+
+            let messageHtml = `
+        <div class="message ${isCurrentUser ? 'user-message' : 'friend-message'}">
+            <img src="${senderImage}" alt="User Image" class="chat-user-image">
+            <span class="message-text">
+                <strong>${isCurrentUser ? 'You' : senderName}:</strong> ${messageContent}
+            </span>
+        </div>
+    `;
+
+            if (prepend) {
+                chatBox.find('.messages').prepend(messageHtml);
+            } else {
+                chatBox.find('.messages').append(messageHtml);
+            }
+        }
     });
 });
-
 
 $('[data-toggle="collapse"]').on('click', function () {
     let target = $(this).data('target');

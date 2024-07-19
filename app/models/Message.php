@@ -24,4 +24,20 @@ class Message
 
         return $stmt->execute();
     }
+
+    function getMessages($userId, $friendId, $limit, $offset) {
+        $stmt = $this->db->prepare("
+            SELECT * FROM messages 
+            WHERE (sender_id = :userId AND recipient_id = :friendId) 
+            OR (sender_id = :friendId AND recipient_id = :userId)
+            ORDER BY created_at DESC 
+            LIMIT :limit OFFSET :offset
+        ");
+        $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);
+        $stmt->bindValue(':friendId', $friendId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
