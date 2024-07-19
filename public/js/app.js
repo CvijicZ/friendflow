@@ -15,13 +15,14 @@ $(document).ready(function () {
 
                 response.data.forEach(friend => {
                     const friendDiv = `
-                        <div class="friend mb-2" data-id="${friend.id}" data-name="${friend.name + " " + friend.surname}">
-                            <div class="d-flex align-items-center">
-                                <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
-                                <span>${friend.name + " " + friend.surname}</span><span class="status-dot"></span>
-                            </div>
+                    <div class="friend mb-2" data-id="${friend.id}" data-name="${friend.name} ${friend.surname}">
+                        <div class="d-flex align-items-center">
+                            <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
+                            <span>${friend.name} ${friend.surname}</span>
+                            <span id="status-dot-${friend.id}" class="status-dot-offline"></span>
                         </div>
-                    `;
+                    </div>
+                `;
                     $('.chat').append(friendDiv);
                 });
             }
@@ -62,8 +63,6 @@ $(document).ready(function () {
             },
             error: function (xhr, status, error) {
                 console.error('AJAX error: ' + status + ' ' + error);
-                // Redirect to error page or handle error as needed
-                // window.location.href = '/friendflow/error';
             }
         });
     });
@@ -93,9 +92,6 @@ $(document).ready(function () {
         // Create a container element to hold the HTML
         let container = document.createElement('div');
         container.innerHTML = html.trim();
-
-        // Set data attributes or IDs dynamically if needed
-        // Example: container.dataset.requestId = request.id;
 
         return container.firstChild;
     }
@@ -132,14 +128,13 @@ $(document).ready(function () {
                 csrf_token: csrfToken
             },
             success: function (response) {
-                console.log(response);
-                // if (response.status == "success") {
-                //     showAlert("Friend request sent");
-                //     parentDiv.remove(); // Remove the parent div
-                // }
-                // if (response.status == "error") {
-                //     showAlert(response.message, "danger");
-                // }
+
+                if (response.status == "success") {
+                    $('.friend-request').filter(`[data-friend-request-id="${friendRequestId}"]`).remove();
+                }
+                if (response.status == "error") {
+                    showAlert(response.message, "danger");
+                }
             },
             error: function (xhr, status, error) {
                 // Handle error
@@ -313,9 +308,21 @@ $(document).ready(function () {
 
     websocket.onmessage = function (event) {
         let data = JSON.parse(event.data);
+
+        if (data.type === 'connectedUsers') {
+            // Update statuses after elements are added
+            setTimeout(() => updateStatuses(data.users), 100);
+        }
+        if (data.type === 'status') {
+            const userId = data.userId;
+            const status = data.status;
+
+            // Update the status dot for the user
+            setStatus(userId, status);
+        }
         let message = data.message;
         let senderId = data.senderId;
-        let senderName = data.senderName + " " + data.senderSurname;
+        let senderName = `${data.senderName} ${data.senderSurname}`;
         let senderImage = "https://via.placeholder.com/40";
 
         // Find the chat box for the sender
@@ -346,6 +353,27 @@ $(document).ready(function () {
         websocket.send(JSON.stringify(message));
     }
 
+    function updateStatuses(users) {
+        let authUserId = $('#auth-user-id').val();
+        setTimeout(() => {
+            $.each(users, function (userId, status) {
+                if (userId == authUserId) {
+                    return;
+                }
+                setStatus(userId, status);
+            });
+        }, 100);
+    }
+
+    function setStatus(friendId, status) {
+        const statusDot = $(`#status-dot-${friendId}`);
+
+        if (status === 'online') {
+            statusDot.removeClass('status-dot-offline').addClass('status-dot-online');
+        } else if (status === 'offline') {
+            statusDot.removeClass('status-dot-online').addClass('status-dot-offline');
+        }
+    }
 
     $(document).ready(function () {
         const maxChats = 5;

@@ -34,7 +34,7 @@
 
             <div class="suggestions">
                 <h4>Suggestions</h4>
-                <?php foreach ($data['all_users'] as $user) : ?>
+                <?php foreach ($data['all_users'] as $user) : if($user['id'] == $_SESSION['user_id']){continue;} ?>
 
                     <div class="suggestion mb-2" data-user-id="<?= $user['id'] ?>">
                         <div class="d-flex align-items-center">

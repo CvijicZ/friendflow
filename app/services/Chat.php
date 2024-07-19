@@ -27,9 +27,9 @@ class Chat implements MessageComponentInterface
     public function __construct()
     {
         $this->clients = new \SplObjectStorage;
-        $this->db = new Database(); // Initialize your Database connection
-        $this->messageModel = new Message($this->db->getConnection()); // Initialize Message model with Database connection
-        $this->userConnections = []; // Initialize an array to store user connections
+        $this->db = new Database();
+        $this->messageModel = new Message($this->db->getConnection());
+        $this->userConnections = [];
         $this->userModel = new User($this->db->getConnection());
 
         echo "WebSocket server started\n";
@@ -37,24 +37,28 @@ class Chat implements MessageComponentInterface
 
     public function onOpen(ConnectionInterface $conn)
     {
-        // Fetch the JWT token from query parameters
         $queryParams = [];
         parse_str($conn->httpRequest->getUri()->getQuery(), $queryParams);
         $jwtToken = $queryParams['token'] ?? null;
         $user_id = $queryParams['user_id'] ?? null;
 
-        if ($jwtToken) {
+        if ($jwtToken && $user_id) {
             try {
                 $jwtService = new JWTService();
                 $decoded = $jwtService->decode($jwtToken);
 
-                // Access properties of the decoded object
                 $tokenUserId = $decoded->sub ?? null;
 
                 if ($tokenUserId && $tokenUserId == $user_id) {
-                    // Validate user ID and store connection
                     $this->userConnections[$user_id] = $conn;
                     $this->clients->attach($conn);
+
+                    $connectedUsers = $this->getConnectedUsers();
+                    $conn->send(json_encode([
+                        'type' => 'connectedUsers',
+                        'users' => $connectedUsers
+                    ]));
+                    $this->broadcastStatus($user_id, 'online');
                     echo "New connection for user {$user_id}! ({$conn->resourceId})\n";
                 } else {
                     echo "Invalid token or user ID. Connection rejected.\n";
@@ -65,7 +69,7 @@ class Chat implements MessageComponentInterface
                 $conn->close();
             }
         } else {
-            echo "JWT token not found in query parameters.\n";
+            echo "JWT token or user ID not found in query parameters.\n";
             $conn->close();
         }
     }
@@ -73,24 +77,32 @@ class Chat implements MessageComponentInterface
     public function onMessage(ConnectionInterface $from, $msg)
     {
         $data = json_decode($msg);
-        $message = $data->message;
-        $recipientId = $data->recipientId;
-        $senderId = array_search($from, $this->userConnections);
 
-        if ($senderId !== false) {
-            $this->storeMessage($senderId, $recipientId, $message);
-            $this->sendToRecipient($recipientId, $message, $senderId);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            echo "Invalid JSON message received.\n";
+            return;
         } else {
-            echo "Sender ID not found in connections.\n";
+            $message = $data->message ?? '';
+            $recipientId = $data->recipientId ?? null;
+            $senderId = array_search($from, $this->userConnections, true);
+
+            if ($senderId !== false && $recipientId) {
+                $this->storeMessage($senderId, $recipientId, $message);
+                $this->sendToRecipient($recipientId, $message, $senderId);
+            } else {
+                echo "Invalid sender or recipient ID.\n";
+            }
         }
     }
 
     public function onClose(ConnectionInterface $conn)
     {
-        $user_id = array_search($conn, $this->userConnections);
+        $user_id = array_search($conn, $this->userConnections, true);
         if ($user_id !== false) {
+            $this->broadcastStatus($user_id, 'offline');
             unset($this->userConnections[$user_id]);
             $this->clients->detach($conn);
+            $conn->close();
             echo "Connection for user {$user_id} has disconnected\n";
         }
     }
@@ -113,7 +125,6 @@ class Chat implements MessageComponentInterface
 
             $senderData = $this->userModel->show($senderId);
 
-            // Create the message payload
             $payload = json_encode([
                 'message' => $message,
                 'senderId' => $senderId,
@@ -121,11 +132,32 @@ class Chat implements MessageComponentInterface
                 'senderSurname' => $senderData['surname']
             ]);
 
-            // Send the payload
             $conn->send($payload);
             echo "Message sent to user {$recipientId}\n";
         } else {
             echo "Recipient ID {$recipientId} not connected\n";
+        }
+    }
+
+    public function getConnectedUsers()
+    {
+        $connectedUsers = [];
+        foreach ($this->userConnections as $userId => $conn) {
+            $connectedUsers[$userId] = 'online';
+        }
+
+        return $connectedUsers;
+    }
+    protected function broadcastStatus($userId, $status)
+    {
+        $payload = json_encode([
+            'type' => 'status',
+            'userId' => $userId,
+            'status' => $status
+        ]);
+
+        foreach ($this->clients as $client) { // TODO: implement feature to send this message only to friends
+            $client->send($payload);
         }
     }
 }
