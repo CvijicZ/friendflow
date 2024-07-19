@@ -9,10 +9,11 @@ use App\Models\Message;
 use Dotenv\Dotenv;
 use App\Services\JWTService;
 use Exception;
+use App\Models\User;
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-$dotenv = Dotenv::createImmutable(__DIR__.'/../../');
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
 $dotenv->load();
 
 class Chat implements MessageComponentInterface
@@ -21,6 +22,7 @@ class Chat implements MessageComponentInterface
     protected $messageModel;
     protected $db;
     protected $userConnections;
+    protected $userModel;
 
     public function __construct()
     {
@@ -28,6 +30,7 @@ class Chat implements MessageComponentInterface
         $this->db = new Database(); // Initialize your Database connection
         $this->messageModel = new Message($this->db->getConnection()); // Initialize Message model with Database connection
         $this->userConnections = []; // Initialize an array to store user connections
+        $this->userModel = new User($this->db->getConnection());
 
         echo "WebSocket server started\n";
     }
@@ -76,7 +79,7 @@ class Chat implements MessageComponentInterface
 
         if ($senderId !== false) {
             $this->storeMessage($senderId, $recipientId, $message);
-            $this->sendToRecipient($recipientId, $message);
+            $this->sendToRecipient($recipientId, $message, $senderId);
         } else {
             echo "Sender ID not found in connections.\n";
         }
@@ -103,11 +106,23 @@ class Chat implements MessageComponentInterface
         $this->messageModel->store($senderId, $recipientId, $message);
     }
 
-    protected function sendToRecipient($recipientId, $message)
+    protected function sendToRecipient($recipientId, $message, $senderId)
     {
         if (isset($this->userConnections[$recipientId])) {
             $conn = $this->userConnections[$recipientId];
-            $conn->send($message);
+
+            $senderData = $this->userModel->show($senderId);
+
+            // Create the message payload
+            $payload = json_encode([
+                'message' => $message,
+                'senderId' => $senderId,
+                'senderName' => $senderData['name'],
+                'senderSurname' => $senderData['surname']
+            ]);
+
+            // Send the payload
+            $conn->send($payload);
             echo "Message sent to user {$recipientId}\n";
         } else {
             echo "Recipient ID {$recipientId} not connected\n";
