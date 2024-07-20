@@ -1,4 +1,7 @@
 
+const WS_IP = "192.168.1.9";
+const WS_PORT = "8080";
+const WS_ADDRESS = WS_IP + ":" + WS_PORT;
 
 $(document).ready(function () {
     // Get all friends
@@ -300,7 +303,7 @@ $(document).ready(function () {
     }
 
     // Create WebSocket with token included in the query parameters
-    let websocket = new WebSocket(`ws://192.168.1.9:8080/chat?token=${encodeURIComponent(token)}&user_id=${userId}`);
+    let websocket = new WebSocket(`ws://${WS_ADDRESS}/chat?token=${encodeURIComponent(token)}&user_id=${userId}`);
 
     websocket.onopen = function () {
         console.log("WebSocket connection established.");

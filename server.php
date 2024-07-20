@@ -2,7 +2,11 @@
 require __DIR__.'/vendor/autoload.php';
 
 use App\Services\Chat;
+use Dotenv\Dotenv;
 
-$server = new \Ratchet\App('192.168.1.9', 8080, '192.168.1.9');
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+$server = new \Ratchet\App($_ENV['WS_HOST'], $_ENV['WS_PORT'], $_ENV['WS_IP']);
 $server->route('/chat', new Chat, ['*']);
 $server->run();

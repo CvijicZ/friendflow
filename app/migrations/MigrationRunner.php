@@ -18,7 +18,8 @@ class MigrationRunner
             new CreatePostsTable($pdo),
             new CreateCommentsTable($pdo),
             new CreateFriendRequestsTable($pdo),
-            new CreateFriendsTable($pdo)
+            new CreateFriendsTable($pdo),
+            new CreateMessagesTable($pdo)
         ];
     }
 
