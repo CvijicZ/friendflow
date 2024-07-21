@@ -4,238 +4,199 @@ const WS_PORT = "8080";
 const WS_ADDRESS = WS_IP + ":" + WS_PORT;
 
 $(document).ready(function () {
-    // Get all friends
+    fetchFriends().then(function (friends) {
+        $('.chat').empty();
+
+        friends.forEach(friend => {
+            const friendDiv = `
+                <div class="friend mb-2" data-id="${friend.id}" data-name="${friend.name} ${friend.surname}">
+                    <div class="d-flex align-items-center">
+                        <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
+                        <span>${friend.name} ${friend.surname}</span>
+                        <span id="status-dot-${friend.id}" class="status-dot-offline"></span>
+                    </div>
+                </div>
+            `;
+            $('.chat').append(friendDiv);
+        });
+    });
+});
+
+// AJAX function to fetch friend requests
+$('#friendRequestsBtn').on('click', function () {
+    $('.friend-requests-container').empty();
+
     let csrfToken = $('meta[name="csrf-token"]').attr('content');
 
     $.ajax({
-        url: '/friendflow/get-all-friends',
+        url: '/friendflow/get-friend-requests',
         type: 'POST',
         data: {
             csrf_token: csrfToken
         },
         success: function (response) {
             if (response.status === "success") {
-
-                response.data.forEach(friend => {
-                    const friendDiv = `
-                    <div class="friend mb-2" data-id="${friend.id}" data-name="${friend.name} ${friend.surname}">
-                        <div class="d-flex align-items-center">
-                            <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
-                            <span>${friend.name} ${friend.surname}</span>
-                            <span id="status-dot-${friend.id}" class="status-dot-offline"></span>
-                        </div>
-                    </div>
-                `;
-                    $('.chat').append(friendDiv);
-                });
+                appendFriendRequests(response.data);
+                $('#friendRequestModal').modal('show');
             }
             if (response.status == 'error') {
-                const errorMessage = '<p>' + response.message + '</p>'
-                $('.chat').append(errorMessage);
+                $('.friend-requests-container').html("<p>No friend requests");
+                $('#friendRequestModal').modal('show');
             }
         },
         error: function (xhr, status, error) {
             console.error('AJAX error: ' + status + ' ' + error);
         }
     });
+});
 
+// TODO: add logic to deny friend request
+$('.friend-requests-container').on('click', '.deny-friend-request', function () {
+    console.log("aaa");
+});
 
+// Accept friend request
+$('.friend-requests-container').on('click', '.accept-friend-request', function () {
 
+    let csrfToken = $('meta[name="csrf-token"]').attr('content');
+    let friendRequestId = $(this).closest('.friend-request').data('friend-request-id');
 
-    // AJAX function to fetch friend requests
-    $('#friendRequestsBtn').on('click', function () {
-        $('.friend-requests-container').empty();
+    if (csrfToken === undefined || friendRequestId === undefined) {
+        console.log('Something went wrong'); // TODO: display error to the user
+        return;
+    }
 
-        let csrfToken = $('meta[name="csrf-token"]').attr('content');
+    $.ajax({
+        url: '/friendflow/accept-friend-request',
+        method: 'POST',
+        data: {
+            friendRequestId: friendRequestId,
+            csrf_token: csrfToken
+        },
+        success: function (response) {
 
-        $.ajax({
-            url: '/friendflow/get-friend-requests',
-            type: 'POST',
-            data: {
-                csrf_token: csrfToken
-            },
-            success: function (response) {
-                if (response.status === "success") {
-                    appendFriendRequests(response.data);
-                    $('#friendRequestModal').modal('show');
-                }
-                if (response.status == 'error') {
-                    $('.friend-requests-container').html("<p>No friend requests");
-                    $('#friendRequestModal').modal('show');
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('AJAX error: ' + status + ' ' + error);
+            if (response.status == "success") {
+                $('.friend-request').filter(`[data-friend-request-id="${friendRequestId}"]`).remove();
             }
-        });
-    });
-
-    // Function to create friend request HTML
-    function createFriendRequestElement(request) {
-        let html = `
-<div class="friend-request" data-friend-request-id="${request.id}">
-    <div class="d-flex align-items-center justify-content-between w-100">
-        <div class="d-flex align-items-center">
-            <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
-            <span>${request.name} ${request.surname}</span>
-        </div>
-        <div class="ml-auto">
-            <div class="btn-group">
-                <button class="btn btn-success btn-sm accept-friend-request">Accept</button>
-                <button class="btn btn-danger btn-sm ml-2 deny-friend-request">Remove</button>
-            </div>
-        </div>
-    </div>
-    <div class="d-flex justify-content-end ml-2">
-        <small class="text-muted">${request.datetime}</small>
-    </div>
-</div>
-    `;
-
-        // Create a container element to hold the HTML
-        let container = document.createElement('div');
-        container.innerHTML = html.trim();
-
-        return container.firstChild;
-    }
-
-    // Function to append friend requests to the container
-    function appendFriendRequests(data) {
-        let container = document.querySelector('.friend-requests-container');
-
-        data.forEach(function (request) {
-            let friendRequestElement = createFriendRequestElement(request);
-            container.appendChild(friendRequestElement);
-        });
-    }
-
-    $('.friend-requests-container').on('click', '.deny-friend-request', function () {
-        console.log("aaa");
-    });
-    // Accept friend request
-    $('.friend-requests-container').on('click', '.accept-friend-request', function () {
-
-        let csrfToken = $('meta[name="csrf-token"]').attr('content');
-        let friendRequestId = $(this).closest('.friend-request').data('friend-request-id');
-
-        if (csrfToken === undefined || friendRequestId === undefined) {
-            console.log('Something went wrong'); // TODO: display error to the user
-            return;
+            if (response.status == "error") {
+                showAlert(response.message, "danger");
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Error occurred during delete:', error);
         }
-
-        $.ajax({
-            url: '/friendflow/accept-friend-request',
-            method: 'POST',
-            data: {
-                friendRequestId: friendRequestId,
-                csrf_token: csrfToken
-            },
-            success: function (response) {
-
-                if (response.status == "success") {
-                    $('.friend-request').filter(`[data-friend-request-id="${friendRequestId}"]`).remove();
-                }
-                if (response.status == "error") {
-                    showAlert(response.message, "danger");
-                }
-            },
-            error: function (xhr, status, error) {
-                // Handle error
-                console.error('Error occurred during delete:', error);
-            }
-        });
     });
+});
 
-    // Add friend
-    $(".add-friend").click(function () {
-        let parentDiv = $(this).closest('.suggestion');
-        let receiverId = parentDiv.data('user-id');
-        let csrfToken = $('meta[name="csrf-token"]').attr('content');
+// Add friend
+$(".add-friend").click(function () {
+    let parentDiv = $(this).closest('.suggestion');
+    let receiverId = parentDiv.data('user-id');
+    let csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-        $.ajax({
-            url: '/friendflow/add-friend',
-            method: 'POST',
-            data: {
-                receiverId: receiverId,
-                csrf_token: csrfToken
-            },
-            success: function (response) {
-                if (response.status == "success") {
-                    showAlert("Friend request sent");
-                    parentDiv.remove(); // Remove the parent div
-                }
-                if (response.status == "error") {
-                    showAlert(response.message, "danger");
-                }
-            },
-            error: function (xhr, status, error) {
-                // Handle error
-                console.error('Error occurred during delete:', error);
+    $.ajax({
+        url: '/friendflow/add-friend',
+        method: 'POST',
+        data: {
+            receiverId: receiverId,
+            csrf_token: csrfToken
+        },
+        success: function (response) {
+            if (response.status == "success") {
+                showAlert("Friend request sent");
+                parentDiv.remove();
             }
-        });
-    });
-
-    // Add comment
-    $(".add-comment").click(function () {
-        let postId = $(this).closest('div').data('post-id');
-        let content = $(this).closest('div').find('.comment-content').val();
-        let csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-        $.ajax({
-            url: '/friendflow/comment',
-            method: 'POST',
-            data: {
-                postId: postId,
-                content: content,
-                csrf_token: csrfToken
-            },
-            success: function (response) {
-                if (response.status == 'success') {
-                    showAlert("Comment created.");
-                }
-                if (response.status == 'error') {
-                    showAlert(response.message, "danger");
-                }
-            },
-            error: function (xhr, status, error) {
-                // Handle error
-                console.error('Error occurred during delete:', error);
+            if (response.status == "error") {
+                showAlert(response.message, "danger");
             }
-        });
+        },
+        error: function (xhr, status, error) {
+            console.error('Error occurred during delete:', error);
+        }
     });
+});
 
-    // Post delete
-    let postIdToDelete;
+// Add comment
+$(".add-comment").click(function () {
+    let postId = $(this).closest('div').data('post-id');
+    let content = $(this).closest('div').find('.comment-content').val();
+    let csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-    $(".delete-btn").click(function () {
-        postIdToDelete = $(this).data('post-id');
-        $('#deleteModal').modal('show');
-    });
+    $.ajax({
+        url: '/friendflow/comment',
+        method: 'POST',
+        data: {
+            postId: postId,
+            content: content,
+            csrf_token: csrfToken
+        },
+        success: function (response) {
+            if (response.status == 'success') {
+                userName = $('#auth-user-name').text();
 
-    $("#confirmDelete").click(function () {
-        let csrfToken = $('meta[name="csrf-token"]').attr('content');
+                let parentDiv = $('#comments_' + postId);
+                let contentDiv = parentDiv.find('.card.card-body');
+                let commentFormDiv = parentDiv.find('.comment-form');
+                let textArea = parentDiv.find('.comment-content');
 
-        $.ajax({
-            url: '/friendflow/post/' + postIdToDelete,
-            method: 'DELETE',
-            data: {
-                id: postIdToDelete,
-                _token: csrfToken
-            },
-            success: function (response) {
-                $('#deleteModal').modal('hide');
-                if (response.status == "success") {
-                    $("#post-" + postIdToDelete).remove();
-                }
-                if (response.status == "error") {
-                    console.log(response.message);
-                }
-            },
-            error: function (xhr, status, error) {
-                // Handle error
-                console.error('Error occurred during delete:', error);
+                commentDiv = ` 
+                    <div class="media mb-3 new-comment">
+                        <img src="#" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
+                          <div class="media-body">
+                            <h6 class="mt-0">
+                              ${userName}
+                            </h6>
+                         <p>${content}</p>
+                          </div>
+                    </div>
+                    <hr class="bg-light">`;
+
+                textArea.val('');
+                commentFormDiv.before(commentDiv);
+
+                contentDiv.find('.new-comment').hide();
+                contentDiv.find('.new-comment').slideDown(800);
             }
-        });
+            if (response.status == 'error') {
+                showAlert(response.message, "danger");
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Error occurred during delete:', error);
+        }
+    });
+});
+
+// Post delete
+let postIdToDelete;
+
+$(".delete-btn").click(function () {
+    postIdToDelete = $(this).data('post-id');
+    $('#deleteModal').modal('show');
+});
+
+$("#confirmDelete").click(function () {
+    let csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+    $.ajax({
+        url: '/friendflow/post/' + postIdToDelete,
+        method: 'DELETE',
+        data: {
+            id: postIdToDelete,
+            _token: csrfToken
+        },
+        success: function (response) {
+            $('#deleteModal').modal('hide');
+            if (response.status == "success") {
+                $("#post-" + postIdToDelete).remove();
+            }
+            if (response.status == "error") {
+                console.log(response.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Error occurred during delete:', error);
+        }
     });
 });
 
@@ -413,42 +374,44 @@ $(document).ready(function () {
                 dataType: 'json',
                 success: function (data) {
                     if (data.status === 'success') {
-                        let userMessages = data.messages.user_messages;
-                        let friendMessages = data.messages.friend_messages;
+                        let messages = data.messages;
 
-                        let allMessages = userMessages.concat(friendMessages);
-
-                        allMessages.sort(function (a, b) {
+                        messages.sort(function (a, b) {
                             return new Date(a.created_at) - new Date(b.created_at);
                         });
 
-                        // Function to display messages
                         function appendMessages(messages, prepend) {
                             if (prepend) {
-                                // Reverse the order of new messages for prepending
-                                messages.reverse();
+                                messages.forEach(function (message) {
+                                    showMessage(
+                                        chatBox,
+                                        message.message,
+                                        message.sender_id == userId ? userId : friendId,
+                                        message.sender_id == userId ? 'You' : friendName,
+                                        message.sender_id == userId ? "https://via.placeholder.com/40" : friendImage,
+                                        prepend
+                                    );
+                                });
+                            } else {
+                                messages.forEach(function (message) {
+                                    showMessage(
+                                        chatBox,
+                                        message.message,
+                                        message.sender_id == userId ? userId : friendId,
+                                        message.sender_id == userId ? 'You' : friendName,
+                                        message.sender_id == userId ? "https://via.placeholder.com/40" : friendImage,
+                                        prepend
+                                    );
+                                });
                             }
-
-                            messages.forEach(function (message) {
-                                showMessage(
-                                    chatBox,
-                                    message.content,
-                                    message.sender_id === userId ? userId : friendId,
-                                    message.sender_id === userId ? 'You' : friendName,
-                                    message.sender_id === userId ? "https://via.placeholder.com/40" : friendImage,
-                                    prepend
-                                );
-                            });
                         }
 
                         if (prepend) {
-                            appendMessages(allMessages, true);
-
-                            // Restore the scroll position after messages are prepended
+                            appendMessages(messages, true);
                             let newHeight = chatBox.find('.messages')[0].scrollHeight;
                             chatBox.find('.messages').scrollTop(newHeight - initialHeight + scrollTop);
                         } else {
-                            appendMessages(allMessages, false);
+                            appendMessages(messages, false);
                             chatBox.find('.messages').scrollTop(chatBox.find('.messages')[0].scrollHeight);
                         }
                     } else {
@@ -479,6 +442,7 @@ $(document).ready(function () {
             let friendImage = $(this).find('img').attr('src');
 
             if (openChats.has(friendId)) {
+                $('#chatModal').modal('hide');
                 return;
             }
 
@@ -508,6 +472,8 @@ $(document).ready(function () {
             updateChatPositions();
             chatBox.show();
 
+            $('#chatModal').modal('hide');
+
             loadMessages(chatBox, friendId, $('#auth-user-id').val());
 
             chatBox.on('click', '.close-chat', function () {
@@ -518,6 +484,7 @@ $(document).ready(function () {
                 updateChatPositions();
             });
 
+            // Handle send message button click
             chatBox.on('click', '.send-message', function () {
                 let messageInput = chatBox.find('input');
                 let userId = $('#auth-user-id').val();
@@ -533,6 +500,14 @@ $(document).ready(function () {
                 }
             });
 
+            // Handle Enter key press for sending messages
+            chatBox.on('keydown', 'input', function (e) {
+                if (e.keyCode === 13 && !e.shiftKey) {
+                    e.preventDefault();
+                    chatBox.find('.send-message').click();
+                }
+            });
+
             // Attach scroll event to the messages div within the newly created chat box
             chatBox.find('.messages').on('scroll', function () {
                 let scrollTop = $(this).scrollTop();
@@ -541,60 +516,104 @@ $(document).ready(function () {
                     loadMessages(chatBox, friendId, $('#auth-user-id').val(), true);
                 }
             });
+
+            $('[data-toggle="collapse"]').on('click', function () {
+                let target = $(this).data('target');
+                $(target).collapse('toggle');
+            });
         });
-
-        function showMessage(chatBox, messageContent, senderId, senderName, senderImage, prepend = false) {
-            let isCurrentUser = senderId === $('#auth-user-id').val();
-
-            let messageHtml = `
-        <div class="message ${isCurrentUser ? 'user-message' : 'friend-message'}">
-            <img src="${senderImage}" alt="User Image" class="chat-user-image">
-            <span class="message-text">
-                <strong>${isCurrentUser ? 'You' : senderName}:</strong> ${messageContent}
-            </span>
-        </div>
-    `;
-
-            if (prepend) {
-                chatBox.find('.messages').prepend(messageHtml);
-            } else {
-                chatBox.find('.messages').append(messageHtml);
-            }
-        }
     });
-});
 
-$('[data-toggle="collapse"]').on('click', function () {
-    let target = $(this).data('target');
-    $(target).collapse('toggle');
+    function showAlert(message, type = 'success') {
+        let $alert = $('#alertTemplate').clone();
+        $alert.find('#alertMessage').text(message);
+
+        $alert.addClass('alert alert-dismissible fade show alert-' + type)
+            .removeClass('d-none');
+
+        $('#alerts-container').empty().append($alert);
+
+        setTimeout(function () {
+            $alert.alert('close');
+        }, 5000);
+    }
 });
 
 function showMessage(chatBox, messageContent, senderId, senderName, senderImage) {
 
-    let isCurrentUser = senderId === $('#auth-user-id').val();
+    let isCurrentUser = senderId == $('#auth-user-id').val();
+    console.log("Current user: " + $('#auth-user-id').val());
+    console.log("Sender id: " + senderId);
 
     let messageHtml = `
-    <div class="message">
-        <img src="${senderImage}" alt="User Image" class="chat-user-image">
-        <span class="message-text">
-            <strong>${isCurrentUser ? 'You' : senderName}:</strong> ${messageContent}
-        </span>
-    </div>
+<div class="message">
+    <img src="${senderImage}" alt="User Image" class="chat-user-image">
+    <span class="message-text">
+        <strong>${isCurrentUser ? 'You' : senderName}:</strong> ${messageContent}
+    </span>
+</div>
 `;
 
     chatBox.find('.messages').append(messageHtml);
 }
 
-function showAlert(message, type = 'success') {
-    let $alert = $('#alertTemplate').clone();
-    $alert.find('#alertMessage').text(message);
+function fetchFriends() {
+    let csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-    $alert.addClass('alert alert-dismissible fade show alert-' + type)
-        .removeClass('d-none');
+    return $.ajax({
+        url: '/friendflow/get-all-friends',
+        type: 'POST',
+        data: {
+            csrf_token: csrfToken
+        },
+        dataType: 'json',
+    }).then(function (response) {
+        if (response.status === "success") {
+            return response.data;
+        } else if (response.status === 'error') {
+            console.error('Error fetching friends:', response.message);
+            return [];
+        }
+    }).fail(function (xhr, status, error) {
+        console.error('AJAX error:', status, error);
+        return [];
+    });
+}
 
-    $('#alerts-container').empty().append($alert);
+// Function to create friend request HTML
+function createFriendRequestElement(request) {
+    let html = `
+<div class="friend-request" data-friend-request-id="${request.id}">
+<div class="d-flex align-items-center justify-content-between w-100">
+    <div class="d-flex align-items-center">
+        <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
+        <span>${request.name} ${request.surname}</span>
+    </div>
+    <div class="ml-auto">
+        <div class="btn-group">
+            <button class="btn btn-success btn-sm accept-friend-request">Accept</button>
+            <button class="btn btn-danger btn-sm ml-2 deny-friend-request">Remove</button>
+        </div>
+    </div>
+</div>
+<div class="d-flex justify-content-end ml-2">
+    <small class="text-muted">${request.datetime}</small>
+</div>
+</div>
+`;
 
-    setTimeout(function () {
-        $alert.alert('close');
-    }, 5000);
+    let container = document.createElement('div');
+    container.innerHTML = html.trim();
+
+    return container.firstChild;
+}
+
+// Function to append friend requests to the container
+function appendFriendRequests(data) {
+    let container = document.querySelector('.friend-requests-container');
+
+    data.forEach(function (request) {
+        let friendRequestElement = createFriendRequestElement(request);
+        container.appendChild(friendRequestElement);
+    });
 }

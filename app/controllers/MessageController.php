@@ -23,10 +23,10 @@ class MessageController extends Controller
 
     public function getMessages()
     {
-        $userId=$_POST['user_id'];
-        $friendId=$_POST['friend_id'];
-        $limit=$_POST['limit'];
-        $offset=$_POST['offset'];
+        $userId = $_POST['user_id'];
+        $friendId = $_POST['friend_id'];
+        $limit = $_POST['limit'];
+        $offset = $_POST['offset'];
 
         header('Content-Type: application/json; charset=utf-8');
 
@@ -37,38 +37,13 @@ class MessageController extends Controller
             exit();
         }
 
-        $rawMessages = $this->model->getMessages($userId, $friendId, $limit, $offset);
+        $messages = $this->model->getMessages($userId, $friendId, $limit, $offset);
 
-        $processedMessages = $this->processMessages($userId, $rawMessages);
-
-        if ($processedMessages) {
-            echo json_encode(['status' => "success", "messages" => $processedMessages]);
+        if ($messages) {
+            echo json_encode(['status' => "success", "messages" => $messages]);
             exit();
         }
         echo json_encode(['status' => "error", "message" => "No messages found"]);
         exit();
-    }
-
-    function processMessages($userId, $messages) {
-        $result = [
-            'user_messages' => [],
-            'friend_messages' => []
-        ];
-    
-        foreach ($messages as $message) {
-            $messageContent = htmlspecialchars($message['message']);
-            $messageData = [
-                'content' => $messageContent,
-                'created_at' => $message['created_at']
-            ];
-    
-            if ($message['sender_id'] == $userId) {
-                $result['user_messages'][] = $messageData;
-            } else {
-                $result['friend_messages'][] = $messageData;
-            }
-        }
-    
-        return $result; 
     }
 }

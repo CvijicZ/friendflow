@@ -27,10 +27,10 @@ class Message
 
     function getMessages($userId, $friendId, $limit, $offset) {
         $stmt = $this->db->prepare("
-            SELECT * FROM messages 
+            SELECT id, message, created_at, sender_id FROM messages 
             WHERE (sender_id = :userId AND recipient_id = :friendId) 
             OR (sender_id = :friendId AND recipient_id = :userId)
-            ORDER BY created_at DESC 
+            ORDER BY created_at ASC 
             LIMIT :limit OFFSET :offset
         ");
         $stmt->bindValue(':userId', $userId, PDO::PARAM_INT);

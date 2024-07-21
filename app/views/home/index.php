@@ -34,7 +34,9 @@
 
             <div class="suggestions">
                 <h4>Suggestions</h4>
-                <?php foreach ($data['all_users'] as $user) : if($user['id'] == $_SESSION['user_id']){continue;} ?>
+                <?php foreach ($data['all_users'] as $user) : if ($user['id'] == $_SESSION['user_id']) {
+                        continue;
+                    } ?>
 
                     <div class="suggestion mb-2" data-user-id="<?= $user['id'] ?>">
                         <div class="d-flex align-items-center">
@@ -50,10 +52,10 @@
         <!-- End of left sidebar -->
 
         <!-- Main Section -->
-        <div class="main-content col-8 overflow-auto pb-5" style="height: 100vh;overflow-x: hidden;">
+        <div class="main-content col-8 overflow-auto pb-5 bg-dark" style="height: 100vh;overflow-x: hidden;">
 
             <!-- New Post Form -->
-            <div class="card mb-3 w-auto bg-dark text-light ">
+            <div class="card mb-3 w-auto bg-secondary text-light">
                 <div class="card-body">
                     <div class="media">
                         <img src="https://via.placeholder.com/40" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
@@ -64,18 +66,17 @@
 
                             <form action="/friendflow/post" method="POST" enctype="multipart/form-data">
                                 <div class="form-group">
-                                    <textarea class="form-control" name="post_text" rows="3" placeholder="What's on your mind?"></textarea>
+                                    <textarea class="form-control" id="postText" name="post_text" rows="3" placeholder="What's on your mind?"></textarea>
                                 </div>
-                                <div class="form-group">
-                                    <label class="btn btn-secondary">
-                                        <i class="fa fa-upload"></i> Upload Image
+                                <div class="form-group d-flex align-items-center">
+                                    <label class="btn btn-info m-0">
+                                        <i class="fa fa-upload"></i> Image
                                         <input type="file" name="post_image" class="form-control-file d-none">
                                     </label>
+                                    <button type="submit" class="btn btn-primary ml-auto">Post</button>
                                 </div>
                                 <input type="hidden" name="csrf_token" value="<?= \App\Middlewares\CSRFMiddleware::getToken() ?>">
-                                <button type="submit" class="btn btn-primary">Post</button>
                             </form>
-
                         </div>
                     </div>
                 </div>
@@ -85,14 +86,14 @@
             <!-- List of all posts -->
             <?php
             foreach ($data['posts'] as $post) : ?>
-                <div class="card mb-3 w-auto bg-dark text-light" id="post-<?= $post['id'] ?>">
+                <div class="card mb-3 w-auto bg-secondary text-light" id="post-<?= $post['id'] ?>">
 
                     <div class="card-body">
                         <div class="media">
                             <!-- If post is created by auth user show options -->
                             <?php if ($post['user_id'] == $_SESSION['user_id']) : ?>
                                 <div class="dropdown" style="position: absolute; top: 10px; right: 10px;">
-                                    <button class="btn btn-link p-0" type="button" id="dropdownMenuButton<?= $post['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <button class="btn btn-dark p-1" type="button" id="dropdownMenuButton<?= $post['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <i class="fas fa-ellipsis-h"></i>
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-right text-center mx-auto bg-dark" aria-labelledby="dropdownMenuButton<?= $post['id'] ?>">
@@ -123,7 +124,7 @@
                         </button>
 
                         <div class="collapse" id="comments_<?= $post['id'] ?>">
-                            <div class="card card-body mt-3 bg-dark text-light">
+                            <div class="card card-body mt-3 bg-secondary text-light">
 
                                 <?php foreach ($post['comments'] as $comment) : ?>
 
@@ -136,10 +137,11 @@
                                             <p><?= htmlspecialchars($comment['content']) ?></p>
                                         </div>
                                     </div>
+                                    <hr class="bg-light">
 
                                 <?php endforeach; ?>
 
-                                <div class="mt-3" data-post-id="<?= $post['id'] ?>">
+                                <div class="mt-3 comment-form" data-post-id="<?= $post['id'] ?>">
                                     <textarea class="form-control comment-content" rows="2" placeholder="Add a comment..."></textarea>
                                     <button class="btn btn-primary mt-2 add-comment">Post Comment</button>
                                 </div>
@@ -164,6 +166,23 @@
         <!-- End of right sidebar -->
     </div>
 </div>
+
+<!-- Chat Modal -->
+<div class="modal fade" id="chatModal" tabindex="-1" role="dialog" aria-labelledby="chatModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content bg-dark text-light">
+            <div class="modal-header">
+                <h5 class="modal-title" id="chatModalLabel">Chat</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="chatModalBody">
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
