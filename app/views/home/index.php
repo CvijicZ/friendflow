@@ -160,7 +160,9 @@
             </div>
 
             <div class="chat">
-                <h4>Available Friends</h4>
+                <h4>
+                    Chat <span class="badge badge-danger badge-pill unseen-messages-number">0</span>
+                </h4>
             </div>
         </div>
         <!-- End of right sidebar -->

@@ -11,7 +11,6 @@
 </head>
 
 <body>
-
     <!-- Mobile Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top navbar-dark bg-dark mobile-navbar d-none">
         <div class="container-fluid">
@@ -28,9 +27,9 @@
                         <i class="fas fa-user-friends"></i>
                         <span class="badge badge-danger badge-pill" id="friendRequestsNumber" style="position: absolute; top: -5px; right: -5px;">0</span>
                     </button>
-                   <button type="button" id="chatBtn" data-bs-target="#chatModal" data-bs-toggle="modal" class="btn btn-outline-primary position-relative mx-2">
+                    <button type="button" id="chatBtn" data-bs-target="#chatModal" data-bs-toggle="modal" class="btn btn-outline-primary position-relative mx-2">
                         <i class="fa-solid fa-comment-dots"></i>
-                        <span class="badge badge-danger badge-pill" id="newMessagesNumber" style="position: absolute; top: -5px; right: -5px;">2</span>
+                        <span class="badge badge-danger badge-pill unseen-messages-number" style="position: absolute; top: -5px; right: -5px;">0</span>
                     </button>
                 </div>
             <?php endif; ?>
@@ -68,25 +67,31 @@
             </div>
         </div>
     </nav>
-
     <!-- End of navbar -->
-
-
-    <!-- Navbar -->
+    <!-- Desktop Navbar -->
     <nav class="navbar sticky-top navbar-dark bg-dark desktop-navbar d-none">
-        <div class="container-fluid">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
             <a class="navbar-brand" href="/friendflow/">Navbar</a>
 
             <?php if (\App\Middlewares\AuthMiddleware::isLoggedIn()) : ?>
-                <div class="d-flex ml-auto">
-                    <button type="button" class="btn btn-outline-primary mr-2 position-relative" id="friendRequestsBtn">
-                        Friend requests
-                        <span class="badge badge-danger badge-pill" id="friendRequestsNumber" style="position: absolute; top: -5px; right: -5px;">0</span>
-                    </button>
-
-                    <a href="/friendflow/" class="btn btn-outline-primary mr-2">Home</a>
-                    <a href="/friendflow/profile" class="btn btn-outline-primary mr-2">Profile</a>
-                    <a href="/friendflow/logout" class="btn btn-outline-primary">Logout</a>
+                <div class="d-flex flex-grow-1 justify-content-between align-items-center">
+                    <!-- Centered Buttons -->
+                    <div class="d-flex mx-auto">
+                        <button type="button" class="btn btn-outline-primary mr-2 position-relative" id="friendRequestsBtn">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span class="badge badge-danger badge-pill" id="friendRequestsNumber" style="position: absolute; top: -5px; right: -5px;">0</span>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary position-relative mx-2">
+                            <i class="fa-solid fa-comment-dots"></i>
+                            <span class="badge badge-danger badge-pill unseen-messages-number" style="position: absolute; top: -5px; right: -5px;">0</span>
+                        </button>
+                    </div>
+                    <!-- Right Aligned Links -->
+                    <div class="d-flex">
+                        <a href="/friendflow/" class="btn btn-outline-primary mr-2">Home <i class="fas fa-home"></i></a>
+                        <a href="/friendflow/profile" class="btn btn-outline-primary mr-2">Profile <i class="fa-solid fa-user"></i></a>
+                        <a href="/friendflow/logout" class="btn btn-outline-primary">Logout <i class="fa-solid fa-right-from-bracket"></i></a>
+                    </div>
                 </div>
             <?php else : ?>
                 <form class="d-flex" action="/friendflow/login" method="POST">
@@ -96,12 +101,10 @@
                     <input type="hidden" name="csrf_token" value="<?= \App\Middlewares\CSRFMiddleware::getToken() ?>">
                     <button class="btn btn-outline-primary" type="submit">Login</button>
                 </form>
-
             <?php endif; ?>
         </div>
     </nav>
     <!-- End of navbar -->
-
     <!-- Flash messages -->
     <?php if ($messages = \App\Core\Flash::get('error')) : ?>
         <?php foreach ($messages as $message) : ?>

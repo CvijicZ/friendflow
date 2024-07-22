@@ -33,6 +33,8 @@ class Router
             '/get-all-friends' => 'App\Controllers\FriendsController@getAllFriends',
             // Messages requests
             '/get-friend-messages' => 'App\Controllers\MessageController@getMessages',
+            '/update-message-status' => 'App\Controllers\MessageController@updateStatus',
+            '/count-unseen-messages' => 'App\Controllers\MessageController@countUnseenMessages',
         ],
         'PUT' => [
             '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@update'],

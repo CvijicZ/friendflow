@@ -87,8 +87,8 @@ class Chat implements MessageComponentInterface
             $senderId = array_search($from, $this->userConnections, true);
 
             if ($senderId !== false && $recipientId) {
-                $this->storeMessage($senderId, $recipientId, $message);
-                $this->sendToRecipient($recipientId, $message, $senderId);
+                $messageId = $this->storeMessage($senderId, $recipientId, $message);
+                $this->sendToRecipient($recipientId, $message, $senderId, $messageId);
             } else {
                 echo "Invalid sender or recipient ID.\n";
             }
@@ -115,10 +115,10 @@ class Chat implements MessageComponentInterface
 
     protected function storeMessage($senderId, $recipientId, $message)
     {
-        $this->messageModel->store($senderId, $recipientId, $message);
+        return $this->messageModel->store($senderId, $recipientId, $message);
     }
 
-    protected function sendToRecipient($recipientId, $message, $senderId)
+    protected function sendToRecipient($recipientId, $message, $senderId, $messageId)
     {
         if (isset($this->userConnections[$recipientId])) {
             $conn = $this->userConnections[$recipientId];
@@ -126,12 +126,14 @@ class Chat implements MessageComponentInterface
             $senderData = $this->userModel->show($senderId);
 
             $payload = json_encode([
+                'id' => $messageId,
                 'message' => $message,
                 'senderId' => $senderId,
                 'senderName' => $senderData['name'],
                 'senderSurname' => $senderData['surname']
             ]);
 
+            $this->updateNumberOfUnseenMessages($recipientId);
             $conn->send($payload);
             echo "Message sent to user {$recipientId}\n";
         } else {
@@ -159,5 +161,14 @@ class Chat implements MessageComponentInterface
         foreach ($this->clients as $client) { // TODO: implement feature to send this message only to friends
             $client->send($payload);
         }
+    }
+    protected function updateNumberOfUnseenMessages($userId)
+    {
+        $numberOfMessages = $this->messageModel->countUnseenMessages($userId);
+        $payload = json_encode([
+            'type' => 'unseenMessages',
+            'numberOfMessages' => $numberOfMessages
+        ]);
+        $this->userConnections[$userId]->send($payload);
     }
 }
