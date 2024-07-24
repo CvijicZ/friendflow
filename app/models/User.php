@@ -16,14 +16,14 @@ class User
     }
     public function index()
     {
-        $sql = "SELECT id,name,surname,email, birthday FROM USERS";
+        $sql = "SELECT id,name,surname,email, birthday, profile_image_name FROM USERS";
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function show($id)
     {
-        $sql = "SELECT id, name, surname, email, birthday FROM users WHERE id=:id";
+        $sql = "SELECT id, name, surname, email, birthday, profile_image_name FROM users WHERE id=:id";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':id', $id);
         $stmt->execute();
@@ -106,7 +106,7 @@ class User
 
     public function updateImage($imageName)
     {
-        $sql = "UPDATE users SET profile_image_path=:imageName WHERE id=:userId";
+        $sql = "UPDATE users SET profile_image_name=:imageName WHERE id=:userId";
 
         $userId = AuthMiddleware::getUserId();
 

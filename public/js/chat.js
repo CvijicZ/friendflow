@@ -7,7 +7,7 @@ export function initChat() {
             const friendDiv = `
                 <div class="friend mb-2" data-id="${friend.id}" data-name="${friend.name} ${friend.surname}">
                     <div class="d-flex align-items-center">
-                        <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
+                        <img src="app/storage/images/profile_images/${friend.profile_image_name}" alt="Friend" class="mr-2">
                         <span>${friend.name} ${friend.surname}</span>
                         <span id="status-dot-${friend.id}" class="status-dot-offline"></span>
                     </div>
@@ -110,7 +110,7 @@ function createFriendRequestElement(request) {
 <div class="friend-request" data-friend-request-id="${request.id}">
 <div class="d-flex align-items-center justify-content-between w-100">
     <div class="d-flex align-items-center">
-        <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
+        <img src="app/storage/images/profile_images/${request.profile_image_name}" alt="Friend" class="mr-2">
         <span>${request.name} ${request.surname}</span>
     </div>
     <div class="ml-auto">

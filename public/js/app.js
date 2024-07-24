@@ -68,12 +68,13 @@ $(document).ready(function () {
         let contentDiv = parentDiv.find('.card.card-body');
         let commentFormDiv = parentDiv.find('.comment-form');
         let textArea = parentDiv.find('.comment-content');
+        let imageName=$('#auth-user-image-name').val();
 
         addComment(postId, content, csrfToken)
             .then(result => {
                 let commentDiv = ` 
             <div class="media mb-3 new-comment">
-                <img src="#" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
+                <img src="app/storage/images/profile_images/${imageName}" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
                   <div class="media-body">
                     <h6 class="mt-0">
                       ${userName}

@@ -30,6 +30,8 @@
                 <p><?= htmlspecialchars($data['auth_user']['email']) ?></p>
                 <p>Birthday: <?= htmlspecialchars($data['auth_user']['birthday']) ?></p>
                 <input type="hidden" id="auth-user-id" value="<?= $data['auth_user']['id'] ?>">
+                <input type="hidden" id="auth-user-image-name" value="<?= $data['auth_user']['profile_image_name'] ?>">
+
             </div>
 
             <div class="suggestions">
@@ -40,10 +42,10 @@
 
                     <div class="suggestion mb-2" data-user-id="<?= $user['id'] ?>">
                         <div class="d-flex align-items-center">
-                            <img src="https://via.placeholder.com/40" alt="Friend" class="mr-2">
+                            <img src="app/storage/images/profile_images/<?=$user['profile_image_name']?>" alt="Friend" class="mr-2">
                             <span><?= htmlspecialchars($user['name']) . " " . htmlspecialchars($user['surname']) ?></span>
                         </div>
-                        <button class="btn btn-primary btn-sm mt-2 add-friend">Add Friend</button>
+                        <a class="add-friend"><i class="fa-solid fa-user-plus"></i></a>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -58,7 +60,7 @@
             <div class="card mb-3 w-auto bg-secondary text-light">
                 <div class="card-body">
                     <div class="media">
-                        <img src="https://via.placeholder.com/40" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
+                        <img src="app/storage/images/profile_images/<?=$data['auth_user']['profile_image_name']?>" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
                         <div class="media-body">
                             <h5 class="mt-0">
                                 <?= htmlspecialchars($data['auth_user']['name']) . " " . htmlspecialchars($data['auth_user']['surname']) ?>
@@ -103,7 +105,7 @@
 
                                 </div>
                             <?php endif; ?>
-                            <img src="app/storage/images/post_images/<?= htmlspecialchars($post['image_name']) ?>" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
+                            <img src="app/storage/images/profile_images/<?= htmlspecialchars($post['user']['profile_image_name']) ?>" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
                             <div class="media-body">
                                 <h5 class="mt-0">
                                     <?= htmlspecialchars($post['user']['name']) . " " . htmlspecialchars($post['user']['surname']) ?>
@@ -129,7 +131,7 @@
                                 <?php foreach ($post['comments'] as $comment) : ?>
 
                                     <div class="media mb-3">
-                                        <img src="commenter1.jpg" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
+                                        <img src="app/storage/images/profile_images/<?=htmlspecialchars($comment['user']['profile_image_name'])?>" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
                                         <div class="media-body">
                                             <h6 class="mt-0">
                                                 <?= htmlspecialchars($comment['user']['name']) . " " . htmlspecialchars($comment['user']['surname']) ?>
