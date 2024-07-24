@@ -59,13 +59,13 @@ class PostController extends Controller
         if (CSRFMiddleware::compare($_token)) {
             header('Content-Type: application/json; charset=utf-8');
             if ($this->validator->usersPost($id)) {
-
+    
                 $post = $this->model->show($id);
-                
+    
                 if ($post && $this->model->destroy($id)) {
-                    $path = "app/storage/images/post_images/" . $post['image_name'];
-                    if (file_exists($path)){
-                        unlink($path);
+                    $imagePath = "app/storage/images/post_images/" . $post['image_name'];
+                    if (!empty($post['image_name']) && is_file($imagePath)) {
+                        unlink($imagePath);
                     }
                     echo json_encode(['status' => "success", "message" => "Post deleted."]);
                     exit();
@@ -79,6 +79,7 @@ class PostController extends Controller
         echo json_encode(['status' => "error", 'message' => "Invalid CSRF."]);
         exit();
     }
+    
     public function update($id, $newContent, $_token)
     {
         header('Content-Type: application/json; charset=utf-8');
