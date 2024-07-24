@@ -21,6 +21,52 @@ class UserController extends Controller
         $this->validator = new UserValidator($this->userModel);
     }
 
+    public function uploadProfileImage()
+    {
+        if (!isset($_FILES['profileImage']) && $_FILES['profileImage']['error'] !== UPLOAD_ERR_OK) {
+
+            Flash::set('error', 'There is no file uploaded or there was an upload error.');
+            header('Location: /friendflow/profile');
+            exit();
+        }
+        
+        $fileTmpPath = $_FILES['profileImage']['tmp_name'];
+        $fileName = $_FILES['profileImage']['name'];
+        $fileSize = $_FILES['profileImage']['size'];
+        $fileType = mime_content_type($fileTmpPath);
+        $fileNameCmps = explode(".", $fileName);
+        $fileExtension = strtolower(end($fileNameCmps));
+
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+        if (!in_array($fileType, $allowedMimeTypes)) {
+            Flash::set('error', 'Upload failed. Allowed file types: ' . implode(',', $allowedMimeTypes));
+            header('Location: /friendflow/profile');
+            exit();
+        }
+        if ($fileSize > 5242880) { // 5MB
+            Flash::set('error', 'Maximum file size is: 5MB');
+            header('Location: /friendflow/profile');
+            exit();
+        }
+
+        $userId = AuthMiddleware::getUserId();
+        $newFileName = $userId . '_' . uniqid() . '.' . $fileExtension;
+        $uploadFileDir = 'app/storage/images/profile_images/';
+        $dest_path = $uploadFileDir . $newFileName;
+
+        if ($this->userModel->updateImage($newFileName)) {
+            if (move_uploaded_file($fileTmpPath, $dest_path)) {
+                Flash::set('success', 'Profile image updated.');
+                header('Location: /friendflow/profile');
+                exit();
+            }
+        }
+        Flash::set('error', 'Unexpected error while updating profile image.');
+        header('Location: /friendflow/profile');
+        exit();
+    }
+
     public function editProfile()
     {
         AuthMiddleware::handle();

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Middlewares\AuthMiddleware;
 use PDO;
 use Exception;
 
@@ -101,5 +102,18 @@ class User
         $stmt->bindParam(':email', $email);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+
+    public function updateImage($imageName)
+    {
+        $sql = "UPDATE users SET profile_image_path=:imageName WHERE id=:userId";
+
+        $userId = AuthMiddleware::getUserId();
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':imageName', $imageName);
+        $stmt->bindParam(':userId', $userId);
+
+        return $stmt->execute();
     }
 }
