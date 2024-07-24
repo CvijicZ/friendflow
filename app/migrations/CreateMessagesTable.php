@@ -14,6 +14,7 @@ class CreateMessagesTable extends Migration
                   sender_id int NOT NULL,
                   recipient_id int NOT NULL,
                   message TEXT NOT NULL,
+                  status varchar(50) NOT NULL DEFAULT "sent",
                   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                  )';
 

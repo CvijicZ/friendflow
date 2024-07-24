@@ -15,6 +15,7 @@ class CreateUsersTable extends Migration{
                 email VARCHAR(255) UNIQUE NOT NULL,
                 birthday DATE NOT NULL,
                 password VARCHAR(600) NOT NULL,
+                profile_image_name varchar(500) NOT NULL DEFAULT 'default-profile-image.png',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )";
             $this->execute($sql, "Database table 'users' created");
