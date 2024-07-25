@@ -10,6 +10,8 @@ use Dotenv\Dotenv;
 use App\Services\JWTService;
 use Exception;
 use App\Models\User;
+use App\Models\Friends;
+use App\Models\Post;
 
 require __DIR__ . '/../../vendor/autoload.php';
 
@@ -23,6 +25,8 @@ class Chat implements MessageComponentInterface
     protected $db;
     protected $userConnections;
     protected $userModel;
+    protected $friendsModel;
+    protected $postModel;
 
     public function __construct()
     {
@@ -31,6 +35,9 @@ class Chat implements MessageComponentInterface
         $this->messageModel = new Message($this->db->getConnection());
         $this->userConnections = [];
         $this->userModel = new User($this->db->getConnection());
+        $this->friendsModel = new Friends($this->db->getConnection());
+        $this->postModel = new Post($this->db->getConnection());
+
 
         echo "WebSocket server started\n";
     }
@@ -99,11 +106,17 @@ class Chat implements MessageComponentInterface
 
                 break;
             case 'newComment':
+                $postId = $data->postId ?? null;
 
+                $creatorId = $this->postModel->getCreator($postId);
+
+                $friends = $this->friendsModel->getAllFriends($creatorId);
+                $friends[] = $creatorId;
+
+                $this->sendNewCommentTrigger($friends, $postId);
                 break;
         }
     }
-
 
     public function onClose(ConnectionInterface $conn)
     {
@@ -126,6 +139,21 @@ class Chat implements MessageComponentInterface
     protected function storeMessage($senderId, $recipientId, $message)
     {
         return $this->messageModel->store($senderId, $recipientId, $message);
+    }
+
+    protected function sendNewCommentTrigger($sendTo, $postId)
+    {
+        $payload = json_encode([
+            'type' => 'newComment',
+            'postId' => $postId
+        ]);
+
+        foreach ($sendTo as $userId) {
+            if (isset($this->userConnections[$userId])) {
+                $conn = $this->userConnections[$userId];
+                $conn->send($payload);
+            }
+        }
     }
 
     protected function sendToRecipient($recipientId, $message, $senderId, $messageId)
@@ -162,6 +190,7 @@ class Chat implements MessageComponentInterface
 
         return $connectedUsers;
     }
+
     protected function broadcastStatus($userId, $status)
     {
         $payload = json_encode([
@@ -174,6 +203,7 @@ class Chat implements MessageComponentInterface
             $client->send($payload);
         }
     }
+
     protected function updateNumberOfUnseenMessages($userId)
     {
         $numberOfMessages = $this->messageModel->countUnseenMessages($userId);

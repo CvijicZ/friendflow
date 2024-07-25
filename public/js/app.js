@@ -1,9 +1,10 @@
 
 import { initChat, getNumberOfUnseenMessages, createFriendsModal, showMessage, updateChatPositions } from '/friendflow/public/js/chat.js';
 import { initializeObserver } from '/friendflow/public/js/observer.js';
-import { initWebSockets, sendMessage } from '/friendflow/public/js/websockets.js';
-import { deletePost, updatePost, addComment } from '/friendflow/public/js/post.js';
+import { initWebSockets, sendMessage, sendComment } from '/friendflow/public/js/websockets.js';
+import { deletePost, updatePost, addComment, regenerateCommentSection } from '/friendflow/public/js/post.js';
 import { addFriend, acceptFriendRequest } from '/friendflow/public/js/friend.js';
+
 
 $(document).ready(function () {
     // Initializing required components on page load
@@ -64,33 +65,11 @@ $(document).ready(function () {
         let content = $(this).closest('div').find('.comment-content').val();
         let csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-        let userName = $('#auth-user-name').text();
-        let parentDiv = $('#comments_' + postId);
-        let contentDiv = parentDiv.find('.card.card-body');
-        let commentFormDiv = parentDiv.find('.comment-form');
-        let textArea = parentDiv.find('.comment-content');
-        let imageName=$('#auth-user-image-name').val();
-
         addComment(postId, content, csrfToken)
             .then(result => {
-                let commentDiv = ` 
-            <div class="media mb-3 new-comment">
-                <img src="app/storage/images/profile_images/${imageName}" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
-                  <div class="media-body">
-                    <h6 class="mt-0">
-                      ${userName}
-                    </h6>
-                 <p>${content}</p>
-                  </div>
-            </div>
-            <hr class="bg-light">`;
-
-                textArea.val('');
-                commentFormDiv.before(commentDiv);
-
-                contentDiv.find('.new-comment').hide();
-                contentDiv.find('.new-comment').slideDown(800);
-            });
+                regenerateCommentSection(postId);
+                sendComment(postId);
+            })
     });
 
     // Post delete

@@ -6,19 +6,22 @@ use App\Validation\PostValidation;
 use App\Core\Flash;
 use App\Core\Database;
 use App\Models\Post;
+use App\Models\Comment;
 use App\Core\Controller;
 use App\Middlewares\CSRFMiddleware;
+use Exception;
 
 class PostController extends Controller
 {
     private $model;
     private $validator;
+    private $commentModel;
     public function __construct()
     {
         $db = new Database();
         $this->model = new Post($db->getConnection());
         $this->validator = new PostValidation($db->getConnection());
-
+        $this->commentModel=new Comment($db->getConnection());
     }
     public function create()
     {
@@ -59,9 +62,9 @@ class PostController extends Controller
         if (CSRFMiddleware::compare($_token)) {
             header('Content-Type: application/json; charset=utf-8');
             if ($this->validator->usersPost($id)) {
-    
+
                 $post = $this->model->show($id);
-    
+
                 if ($post && $this->model->destroy($id)) {
                     $imagePath = "app/storage/images/post_images/" . $post['image_name'];
                     if (!empty($post['image_name']) && is_file($imagePath)) {
@@ -79,7 +82,7 @@ class PostController extends Controller
         echo json_encode(['status' => "error", 'message' => "Invalid CSRF."]);
         exit();
     }
-    
+
     public function update($id, $newContent, $_token)
     {
         header('Content-Type: application/json; charset=utf-8');
@@ -102,5 +105,22 @@ class PostController extends Controller
         }
         echo json_encode(['status' => "error", 'message' => "Invalid CSRF"]);
         exit();
+    }
+
+    public function getComments()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        try {
+            $postId = $_POST['postId'];
+
+            $comments = $this->model->getComments($postId);
+
+            echo json_encode(['status' => "success", 'comments' => $comments]);
+            exit();
+        } catch (Exception $e) {
+            echo json_encode(['status' => "error", 'message' => "Unexpected error"]);
+            exit();
+        }
     }
 }

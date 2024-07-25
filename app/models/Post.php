@@ -130,4 +130,29 @@ class Post
 
         return $result;
     }
+
+    public function getComments($postId)
+    {
+        $sql = "SELECT * FROM posts WHERE id=:postId";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':postId', $postId);
+        $stmt->execute();
+        $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $comments = $this->commentModel->index($post['id']);
+
+            foreach ($comments as &$comment) {
+                $comment['user'] = $this->userModel->show($comment['user_id']);
+            }
+
+            $post['comments'] = $comments;
+        
+
+        return $post;
+    }
+
+    public function getCreator($postId){
+        $postInfo=$this->show($postId);
+        return $postInfo['user_id'];
+    }
 }

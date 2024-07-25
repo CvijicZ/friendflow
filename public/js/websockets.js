@@ -3,6 +3,7 @@ let websocket;
 
 import { showMessage } from '/friendflow/public/js/chat.js';
 import { initializeObserver } from '/friendflow/public/js/observer.js';
+import { regenerateCommentSection } from '/friendflow/public/js/post.js';
 
 export function initWebSockets() {
 
@@ -39,6 +40,11 @@ export function initWebSockets() {
         switch (data.type) {
             case 'connectedUsers':
                 setTimeout(() => updateStatuses(data.users), 100);
+                break;
+
+            case 'newComment':
+                regenerateCommentSection(data.postId);
+
                 break;
 
             case 'status':
@@ -115,4 +121,12 @@ export function sendMessage(recipientId, messageContent) {
         message: messageContent
     };
     websocket.send(JSON.stringify(message));
+}
+
+export function sendComment(postId) {
+    let comment = {
+        type: 'newComment',
+        postId: postId
+    }
+    websocket.send(JSON.stringify(comment));
 }

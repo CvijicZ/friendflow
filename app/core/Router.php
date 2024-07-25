@@ -26,6 +26,7 @@ class Router
             '/post' => 'App\Controllers\PostController@create',
             '/comment' => 'App\Controllers\CommentController@create',
             '/upload-profile-image' => 'App\Controllers\UserController@uploadProfileImage',
+            '/get-comments' => 'App\Controllers\PostController@getComments',
             // HTTP requests related to the friend requests
             '/add-friend' => 'App\Controllers\FriendsController@addFriend',
             '/get-friend-requests' => 'App\Controllers\FriendsController@getFriendRequests',
