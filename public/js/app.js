@@ -33,6 +33,7 @@ $(document).ready(function () {
         acceptFriendRequest(friendRequestId, csrfToken)
             .then(() => {
                 $('.friend-request').filter(`[data-friend-request-id="${friendRequestId}"]`).remove();
+                initChat(); // Call initChat to display new friend in chat section
             })
             .catch(error => {
                 showAlert(error.message, "danger");

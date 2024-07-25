@@ -77,23 +77,33 @@ class Chat implements MessageComponentInterface
     public function onMessage(ConnectionInterface $from, $msg)
     {
         $data = json_decode($msg);
+        $action = $data->type ?? null;
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             echo "Invalid JSON message received.\n";
             return;
-        } else {
-            $message = $data->message ?? '';
-            $recipientId = $data->recipientId ?? null;
-            $senderId = array_search($from, $this->userConnections, true);
+        }
 
-            if ($senderId !== false && $recipientId) {
-                $messageId = $this->storeMessage($senderId, $recipientId, $message);
-                $this->sendToRecipient($recipientId, $message, $senderId, $messageId);
-            } else {
-                echo "Invalid sender or recipient ID.\n";
-            }
+        switch ($action) {
+            case 'sendMessage':
+                $message = $data->message ?? '';
+                $recipientId = $data->recipientId ?? null;
+                $senderId = array_search($from, $this->userConnections, true);
+
+                if ($senderId !== false && $recipientId) {
+                    $messageId = $this->storeMessage($senderId, $recipientId, $message);
+                    $this->sendToRecipient($recipientId, $message, $senderId, $messageId);
+                } else {
+                    echo "Invalid sender or recipient ID.\n";
+                }
+
+                break;
+            case 'newComment':
+
+                break;
         }
     }
+
 
     public function onClose(ConnectionInterface $conn)
     {
@@ -126,11 +136,13 @@ class Chat implements MessageComponentInterface
             $senderData = $this->userModel->show($senderId);
 
             $payload = json_encode([
+                'type' => 'newMessage',
                 'id' => $messageId,
                 'message' => $message,
                 'senderId' => $senderId,
                 'senderName' => $senderData['name'],
-                'senderSurname' => $senderData['surname']
+                'senderSurname' => $senderData['surname'],
+                'senderImageName' => $senderData['profile_image_name']
             ]);
 
             $this->updateNumberOfUnseenMessages($recipientId);

@@ -12,7 +12,7 @@
 
 <body>
     <!-- Mobile Navbar -->
-    <nav class="navbar navbar-expand-lg sticky-top navbar-dark bg-dark mobile-navbar d-none">
+    <nav class="navbar navbar-expand-lg sticky-top navbar-dark bg-gradient-dark mobile-navbar d-none">
         <div class="container-fluid">
             <!-- Home Button -->
             <a class="navbar-brand" href="/friendflow/">
@@ -25,7 +25,7 @@
                 <div class="d-flex mx-auto">
                     <button type="button" class="btn btn-outline-primary position-relative mx-2" id="friendRequestsBtn">
                         <i class="fas fa-user-friends"></i>
-                        <span class="badge badge-danger badge-pill" id="friendRequestsNumber" style="position: absolute; top: -5px; right: -5px;">0</span>
+                        <span class="badge badge-danger badge-pill friendRequestsNumber" style="position: absolute; top: -5px; right: -5px;">0</span>
                     </button>
                     <button type="button" id="chatBtn" data-bs-target="#chatModal" data-bs-toggle="modal" class="btn btn-outline-primary position-relative mx-2">
                         <i class="fa-solid fa-comment-dots"></i>
@@ -69,9 +69,9 @@
     </nav>
     <!-- End of navbar -->
     <!-- Desktop Navbar -->
-    <nav class="navbar sticky-top navbar-dark bg-dark desktop-navbar d-none">
+    <nav class="navbar sticky-top navbar-dark bg-gradient-dark desktop-navbar d-none">
         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <a class="navbar-brand" href="/friendflow/">Navbar</a>
+            <a class="navbar-brand" href="/friendflow/">FriendFlow</a>
 
             <?php if (\App\Middlewares\AuthMiddleware::isLoggedIn()) : ?>
                 <div class="d-flex flex-grow-1 justify-content-between align-items-center">
@@ -79,7 +79,7 @@
                     <div class="d-flex mx-auto">
                         <button type="button" class="btn btn-outline-primary mr-2 position-relative" id="friendRequestsBtn">
                             <i class="fa-solid fa-user-plus"></i>
-                            <span class="badge badge-danger badge-pill" id="friendRequestsNumber" style="position: absolute; top: -5px; right: -5px;">0</span>
+                            <span class="badge badge-danger badge-pill friendRequestsNumber"  style="position: absolute; top: -5px; right: -5px;">0</span>
                         </button>
                         <button type="button" class="btn btn-outline-primary position-relative mx-2">
                             <i class="fa-solid fa-comment-dots"></i>
@@ -139,7 +139,7 @@
                         },
                         success: function(response) {
                             if (response.status === "success") {
-                                $('#friendRequestsNumber').text(response.number_of_requests);
+                                $('.friendRequestsNumber').text(response.number_of_requests);
                             }
                         },
                         error: function(xhr, status, error) {

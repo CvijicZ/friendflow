@@ -108,21 +108,18 @@ function appendFriendRequests(data) {
 function createFriendRequestElement(request) {
     let html = `
 <div class="friend-request" data-friend-request-id="${request.id}">
-<div class="d-flex align-items-center justify-content-between w-100">
-    <div class="d-flex align-items-center">
-        <img src="app/storage/images/profile_images/${request.profile_image_name}" alt="Friend" class="mr-2">
-        <span>${request.name} ${request.surname}</span>
-    </div>
-    <div class="ml-auto">
-        <div class="btn-group">
-            <button class="btn btn-success btn-sm accept-friend-request">Accept</button>
-            <button class="btn btn-danger btn-sm ml-2 deny-friend-request">Remove</button>
+    <div class="d-flex align-items-center justify-content-between w-100">
+        <div class="d-flex align-items-center">
+            <img src="app/storage/images/profile_images/${request.profile_image_name}" alt="Friend" class="mr-2">
+            <span>${request.name} ${request.surname}</span>
+        </div>
+        <div class="ml-auto">
+            <div class="btn-group">
+                <button class="btn btn-success btn-sm accept-friend-request">Accept <i class="fa-solid fa-check"></i></button>
+                <button class="btn btn-danger btn-sm ml-2 deny-friend-request">Remove <i class="fa-solid fa-ban"></i></button>
+            </div>
         </div>
     </div>
-</div>
-<div class="d-flex justify-content-end ml-2">
-    <small class="text-muted">${request.datetime}</small>
-</div>
 </div>
 `;
     let container = document.createElement('div');

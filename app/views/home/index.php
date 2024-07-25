@@ -36,10 +36,8 @@
 
             <div class="suggestions">
                 <h4>Suggestions</h4>
-                <?php foreach ($data['all_users'] as $user) : if ($user['id'] == $_SESSION['user_id']) {
-                        continue;
-                    } ?>
-
+                <?php foreach ($data['suggested_friends'] as $user): ?>
+                       
                     <div class="suggestion mb-2" data-user-id="<?= $user['id'] ?>">
                         <div class="d-flex align-items-center">
                             <img src="app/storage/images/profile_images/<?=$user['profile_image_name']?>" alt="Friend" class="mr-2">

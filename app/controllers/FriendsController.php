@@ -34,7 +34,7 @@ class FriendsController extends Controller
         $allFriendsInfo = [];
 
         foreach ($friendsIds as $friendId) {
-            $userInfo = $this->userModel->show($friendId['friend_id']);
+            $userInfo = $this->userModel->show($friendId);
             $allFriendsInfo[] = $userInfo;
         }
 
@@ -106,7 +106,8 @@ class FriendsController extends Controller
                     'id' => $row['id'],
                     'name' => $requestorDetails['name'],
                     'surname' => $requestorDetails['surname'],
-                    'datetime' => $row['date']
+                    'datetime' => $row['date'],
+                    'profile_image_name' => $requestorDetails['profile_image_name']
                 ];
                 $dataToReturn[] = $requestData;
             }

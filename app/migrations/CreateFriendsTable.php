@@ -27,7 +27,24 @@ class CreateFriendsTable extends Migration
                        BEGIN
                           SET NEW.sum_of_user_ids = NEW.requestor_id + NEW.receiver_id;
                        END;';
+
         $this->execute($triggerSql, "Trigger for friends table created");
+
+        $procedureSql = 'DROP PROCEDURE IF EXISTS getAllFriends;
+                        CREATE PROCEDURE getAllFriends(IN userId INT)
+                         BEGIN
+                            SELECT 
+                                CASE 
+                                    WHEN requestor_id = userId THEN receiver_id
+                                    ELSE requestor_id
+                                END AS friend_id
+                            FROM 
+                                friends
+                            WHERE 
+                                requestor_id = userId OR receiver_id = userId;
+                        END';
+
+        $this->execute($procedureSql, "Stored procedure getAllFriends created");
     }
 
     public function down()

@@ -7,6 +7,7 @@ use App\Middlewares\AuthMiddleware;
 use App\Core\Database;
 use App\Models\User;
 use App\Models\Post;
+use App\Models\Friends;
 
 class HomeController extends Controller
 {
@@ -20,12 +21,13 @@ class HomeController extends Controller
             $db = new Database();
             $userModel = new User($db->getConnection());
             $postModel = new Post($db->getConnection());
+            $friendsModel= new Friends($db->getConnection());
 
             $userInfo = $userModel->show($_SESSION['user_id']);
-            $allPosts = $postModel->index();
-            $allUsers = $userModel->index();
+            $allPosts = $postModel->getPostsFromFriends(AuthMiddleware::getUserId());
+            $friendSuggestions = $friendsModel->getFriendSuggestions(AuthMiddleware::getUserId());
 
-            $this->view('home/index', ['auth_user' => $userInfo, 'posts' => $allPosts, 'all_users' => $allUsers]);
+            $this->view('home/index', ['auth_user' => $userInfo, 'posts' => $allPosts, 'suggested_friends' => $friendSuggestions]);
         } else {
             $this->view('home/guest-index');
         }

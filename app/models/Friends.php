@@ -19,6 +19,26 @@ class Friends
         $this->db = $db;
     }
 
+    public function getAllSentFriendRequests($userId){
+        $sql="SELECT receiver_id FROM friend_requests WHERE requestor_id=:userId";
+
+        $stmt=$this->db->prepare($sql);
+        $stmt->bindParam(':userId', $userId);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_NUM);
+    }
+
+    public function getAllReceivedFriendRequests($userId){
+        $sql="SELECT requestor_id FROM friend_requests WHERE receiver_id=:userId";
+
+        $stmt=$this->db->prepare($sql);
+        $stmt->bindParam(':userId', $userId);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_NUM);
+    }
+
     public function areFriends(int $userId1, int $userId2)
     {
         $sumOfIds = $userId1 + $userId2;
@@ -131,21 +151,72 @@ class Friends
         return $stmt->execute();
     }
 
-    public function getAllFriends($userId) {
-        $sql = "SELECT
-            CASE 
-                WHEN requestor_id = :userId THEN receiver_id 
-                ELSE requestor_id 
-            END AS friend_id
-        FROM 
-            friends
-        WHERE 
-            requestor_id = :userId OR receiver_id = :userId;";
-    
+    public function getAllFriends($userId)
+    {
+        $sql = "CALL getAllFriends(:userId)";
+
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $stmt->bindParam(':userId', $userId);
         $stmt->execute();
+
+        $result = $stmt->fetchAll();
+        return array_column($result, 'friend_id');
+    }
+
+    public function getFriendSuggestions($userId)
+    {
+        try {
+            $friends = $this->getAllFriends($userId);
+            $alreadySentRequestUsers = $this->getAllSentFriendRequests($userId);
+            $receivedRequests=$this->getAllReceivedFriendRequests($userId);
     
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $friends = $this->flattenArray($friends);
+            $alreadySentRequestUsers = $this->flattenArray($alreadySentRequestUsers);
+            $receivedRequests=$this->flattenArray($receivedRequests);
+    
+            $excludeIds = array_merge($friends, $alreadySentRequestUsers, $receivedRequests);
+    
+            if (empty($excludeIds)) {
+                $excludeIds = [$userId];
+            } else {
+                $excludeIds[] = $userId;
+            }
+
+            $placeholders = rtrim(str_repeat('?,', count($excludeIds)), ',');
+
+            $sql = "SELECT id, name, surname, profile_image_name 
+                    FROM users 
+                    WHERE id NOT IN ($placeholders) 
+                    LIMIT 10";
+    
+            $stmt = $this->db->prepare($sql);
+    
+            foreach ($excludeIds as $index => $id) {
+                $stmt->bindValue($index + 1, $id, PDO::PARAM_INT);
+            }
+
+            $stmt->execute();
+
+            $suggestions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+            return $suggestions;
+    
+        } catch (\PDOException $e) {
+            echo "SQL Error: " . $e->getMessage();
+        }
+    }
+    
+
+    private function flattenArray($array) {
+        $result = [];
+        foreach ($array as $item) {
+            if (is_array($item)) {
+                $result = array_merge($result, $this->flattenArray($item));
+            } else {
+                $result[] = $item;
+            }
+        }
+        return $result;
     }
 }
+

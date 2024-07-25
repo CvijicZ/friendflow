@@ -1,8 +1,8 @@
 
 let websocket;
 
-import {showMessage} from '/friendflow/public/js/chat.js';
-import {initializeObserver} from '/friendflow/public/js/observer.js';
+import { showMessage } from '/friendflow/public/js/chat.js';
+import { initializeObserver } from '/friendflow/public/js/observer.js';
 
 export function initWebSockets() {
 
@@ -36,35 +36,41 @@ export function initWebSockets() {
     websocket.onmessage = function (event) {
         let data = JSON.parse(event.data);
 
-        if (data.type === 'connectedUsers') {
-            // Update statuses after elements are added
-            setTimeout(() => updateStatuses(data.users), 100);
-        }
-        if (data.type === 'status') {
-            const userId = data.userId;
-            const status = data.status;
+        switch (data.type) {
+            case 'connectedUsers':
+                setTimeout(() => updateStatuses(data.users), 100);
+                break;
 
-            // Update the status dot for the user
-            setStatus(userId, status);
-        }
+            case 'status':
+                const userId = data.userId;
+                const status = data.status;
 
-        if (data.type == 'unseenMessages') {
-            $('.unseen-messages-number').text(data.numberOfMessages);
-        }
-        let message = data.message;
-        let senderId = data.senderId;
-        let senderName = `${data.senderName} ${data.senderSurname}`;
-        let senderImage = "https://via.placeholder.com/40";
-        // Find the chat box for the sender
-        let chatBox = $(`.chat-box[data-id="${senderId}"]`);
+                // Update the status dot for the user
+                setStatus(userId, status);
+                break;
 
-        if (chatBox.is(':visible')) {
-            let messageHtml = showMessage(chatBox, message, senderId, senderName, senderImage);
+            case 'unseenMessages':
+                $('.unseen-messages-number').text(data.numberOfMessages);
+                break;
 
-            $(messageHtml).attr('data-id', data.id);
-            $(messageHtml).addClass('unseen');
+            case 'newMessage':
 
-            initializeObserver();
+                let message = data.message;
+                let senderId = data.senderId;
+                let senderName = `${data.senderName} ${data.senderSurname}`;
+                let senderImage = `app/storage/images/profile_images/${data.senderImageName}`;
+                // Find the chat box for the sender
+                let chatBox = $(`.chat-box[data-id="${senderId}"]`);
+
+                if (chatBox.is(':visible')) {
+                    let messageHtml = showMessage(chatBox, message, senderId, senderName, senderImage);
+
+                    $(messageHtml).attr('data-id', data.id);
+                    $(messageHtml).addClass('unseen');
+
+                    initializeObserver();
+                }
+                break;
         }
     };
 
@@ -100,11 +106,11 @@ export function initWebSockets() {
             });
         }, 100);
     }
-
 }
 
 export function sendMessage(recipientId, messageContent) {
     let message = {
+        type: 'sendMessage',
         recipientId: recipientId,
         message: messageContent
     };
