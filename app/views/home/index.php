@@ -36,11 +36,11 @@
 
             <div class="suggestions">
                 <h4>Suggestions</h4>
-                <?php foreach ($data['suggested_friends'] as $user): ?>
-                       
+                <?php foreach ($data['suggested_friends'] as $user) : ?>
+
                     <div class="suggestion mb-2" data-user-id="<?= $user['id'] ?>">
                         <div class="d-flex align-items-center">
-                            <img src="app/storage/images/profile_images/<?=$user['profile_image_name']?>" alt="Friend" class="mr-2">
+                            <img src="app/storage/images/profile_images/<?= $user['profile_image_name'] ?>" alt="Friend" class="mr-2">
                             <span><?= htmlspecialchars($user['name']) . " " . htmlspecialchars($user['surname']) ?></span>
                         </div>
                         <a class="add-friend"><i class="fa-solid fa-user-plus"></i></a>
@@ -58,7 +58,7 @@
             <div class="card mb-3 w-auto bg-secondary text-light">
                 <div class="card-body">
                     <div class="media">
-                        <img src="app/storage/images/profile_images/<?=$data['auth_user']['profile_image_name']?>" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
+                        <img src="app/storage/images/profile_images/<?= $data['auth_user']['profile_image_name'] ?>" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
                         <div class="media-body">
                             <h5 class="mt-0">
                                 <?= htmlspecialchars($data['auth_user']['name']) . " " . htmlspecialchars($data['auth_user']['surname']) ?>
@@ -119,8 +119,8 @@
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <button class="btn btn-link mt-3" type="button" data-toggle="collapse" data-target="#comments_<?= $post['id'] ?>" aria-expanded="false" aria-controls="commentsSection">
-                            Show Comments
+                        <button class="btn btn-primary mt-3" type="button" data-toggle="collapse" data-target="#comments_<?= $post['id'] ?>" aria-expanded="false" aria-controls="commentsSection">
+                            Comments <i class="fa-regular fa-comment"></i> <span id="number_of_comments_<?= $post['id'] ?>"><?= $post['numberofComments'] ?></span>
                         </button>
 
                         <div class="collapse" id="comments_<?= $post['id'] ?>">
@@ -129,7 +129,7 @@
                                 <?php foreach ($post['comments'] as $comment) : ?>
 
                                     <div class="media mb-3">
-                                        <img src="app/storage/images/profile_images/<?=htmlspecialchars($comment['user']['profile_image_name'])?>" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
+                                        <img src="app/storage/images/profile_images/<?= htmlspecialchars($comment['user']['profile_image_name']) ?>" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
                                         <div class="media-body">
                                             <h6 class="mt-0">
                                                 <?= htmlspecialchars($comment['user']['name']) . " " . htmlspecialchars($comment['user']['surname']) ?>

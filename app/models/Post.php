@@ -21,8 +21,8 @@ class Post
         $this->userModel = new User($this->db);
         $this->commentModel = new Comment($this->db);
         $this->friendsModel = new Friends($this->db);
-
     }
+
     public function index()
     {
         $sql = "SELECT * FROM posts ORDER BY created_at DESC";
@@ -53,6 +53,7 @@ class Post
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
     public function store(string $content, string $image = null)
     {
         $sql = "INSERT INTO posts(user_id, content, image_name) VALUES(:user_id, :content, :image_name)";
@@ -63,6 +64,7 @@ class Post
 
         return $stmt->execute();
     }
+
     public function update($id, $newContent)
     {
         $sql = "UPDATE posts SET content=:newContent WHERE id=:id";
@@ -73,6 +75,7 @@ class Post
 
         return $stmt->execute();
     }
+
     public function destroy($id)
     {
         $sql = "DELETE FROM posts WHERE id=:id";
@@ -86,8 +89,7 @@ class Post
     public function getPostsFromFriends($userId)
     {
         $friends = $this->friendsModel->getAllFriends($userId);
-        $friends[]=AuthMiddleware::getUserId(); // Add and users id to get his own posts
-    
+        $friends[] = AuthMiddleware::getUserId(); // Add and users id to get his own posts
 
         if (empty($friends)) {
             return [];
@@ -105,6 +107,7 @@ class Post
         foreach ($posts as &$post) {
             $post['user'] = $this->userModel->show($post['user_id']);
             $comments = $this->commentModel->index($post['id']);
+            $post['numberofComments'] = $this->countComments($post['id']);
 
             foreach ($comments as &$comment) {
                 $comment['user'] = $this->userModel->show($comment['user_id']);
@@ -113,5 +116,18 @@ class Post
             $post['comments'] = $comments;
         }
         return $posts;
+    }
+
+    public function countComments($postId)
+    {
+        $sql = "SELECT COUNT(*) FROM comments WHERE post_id=:postId";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':postId', $postId);
+        $stmt->execute();
+
+        $result = $stmt->fetchColumn();
+
+        return $result;
     }
 }
