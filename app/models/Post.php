@@ -97,7 +97,7 @@ class Post
 
         $placeholders = rtrim(str_repeat('?,', count($friends)), ',');
 
-        $sql = "SELECT * FROM posts WHERE user_id IN ($placeholders)";
+        $sql = "SELECT * FROM posts WHERE user_id IN ($placeholders) ORDER BY created_at DESC";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($friends);

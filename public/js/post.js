@@ -132,6 +132,14 @@ export function regenerateCommentSection(postId) {
         });
 }
 
+export function convertAllPostsDates(){
+    $('.post_date').each(function() {
+        const datetime = $(this).data('datetime');
+        const humanReadable = moment(datetime).fromNow();
+        $(this).text(humanReadable);
+    });
+}
+
 function clearCommentContent(comment_id) {
     $('#comments_' + comment_id).remove();
 }

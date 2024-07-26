@@ -2,7 +2,7 @@
 import { initChat, getNumberOfUnseenMessages, createFriendsModal, showMessage, updateChatPositions } from '/friendflow/public/js/chat.js';
 import { initializeObserver } from '/friendflow/public/js/observer.js';
 import { initWebSockets, sendMessage, sendComment } from '/friendflow/public/js/websockets.js';
-import { deletePost, updatePost, addComment, regenerateCommentSection } from '/friendflow/public/js/post.js';
+import { deletePost, updatePost, addComment, regenerateCommentSection, convertAllPostsDates } from '/friendflow/public/js/post.js';
 import { addFriend, acceptFriendRequest } from '/friendflow/public/js/friend.js';
 
 
@@ -12,6 +12,9 @@ $(document).ready(function () {
     getNumberOfUnseenMessages();
     initializeObserver();
     initChat();
+
+    convertAllPostsDates(); // On load convert datetimes to human readable
+    setInterval(convertAllPostsDates, 60000); // After initial convert, update that times every 60 seconds
 
     // Chat related functions, script: chat.js
     $(document).on('click', '#friendRequestsBtn', function () {

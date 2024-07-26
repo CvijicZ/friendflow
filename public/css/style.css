@@ -163,6 +163,23 @@ body {
 
 /* End of chat */
 
+.post-image-container {
+    width: 300px; /* Fixed width */
+    height: 300px; /* Fixed height */
+    overflow: hidden; /* Hide overflow if necessary */
+    display: flex; /* Center image within the container */
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.post-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover; /* Maintain aspect ratio, cover container */
+}
+
+
 .container {
     margin-top: 50px;
 }
