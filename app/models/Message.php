@@ -37,6 +37,7 @@ class Message
         $stmt->bindParam(':message', $message, PDO::PARAM_STR);
 
         $stmt->execute();
+
         return $this->db->lastInsertId();
     }
 
@@ -54,6 +55,7 @@ class Message
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

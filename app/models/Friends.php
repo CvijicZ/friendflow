@@ -19,20 +19,22 @@ class Friends
         $this->db = $db;
     }
 
-    public function getAllSentFriendRequests($userId){
-        $sql="SELECT receiver_id FROM friend_requests WHERE requestor_id=:userId";
+    public function getAllSentFriendRequests($userId)
+    {
+        $sql = "SELECT receiver_id FROM friend_requests WHERE requestor_id=:userId";
 
-        $stmt=$this->db->prepare($sql);
+        $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':userId', $userId);
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_NUM);
     }
 
-    public function getAllReceivedFriendRequests($userId){
-        $sql="SELECT requestor_id FROM friend_requests WHERE receiver_id=:userId";
+    public function getAllReceivedFriendRequests($userId)
+    {
+        $sql = "SELECT requestor_id FROM friend_requests WHERE receiver_id=:userId";
 
-        $stmt=$this->db->prepare($sql);
+        $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':userId', $userId);
         $stmt->execute();
 
@@ -69,7 +71,6 @@ class Friends
 
     public function getFriendRequests($userId)
     {
-
         $status = Friends::DEFAULT_FRIEND_REQUEST_STATUS;
 
         $sql = "SELECT * FROM friend_requests WHERE receiver_id=:userId AND status=:status";
@@ -85,7 +86,6 @@ class Friends
 
     public function countFriendRequests($userId)
     {
-
         $status = Friends::DEFAULT_FRIEND_REQUEST_STATUS;
 
         $sql = "SELECT COUNT(*) AS requestCount FROM friend_requests WHERE receiver_id = :userId AND status=:status";
@@ -168,14 +168,14 @@ class Friends
         try {
             $friends = $this->getAllFriends($userId);
             $alreadySentRequestUsers = $this->getAllSentFriendRequests($userId);
-            $receivedRequests=$this->getAllReceivedFriendRequests($userId);
-    
+            $receivedRequests = $this->getAllReceivedFriendRequests($userId);
+
             $friends = $this->flattenArray($friends);
             $alreadySentRequestUsers = $this->flattenArray($alreadySentRequestUsers);
-            $receivedRequests=$this->flattenArray($receivedRequests);
-    
+            $receivedRequests = $this->flattenArray($receivedRequests);
+
             $excludeIds = array_merge($friends, $alreadySentRequestUsers, $receivedRequests);
-    
+
             if (empty($excludeIds)) {
                 $excludeIds = [$userId];
             } else {
@@ -188,9 +188,9 @@ class Friends
                     FROM users 
                     WHERE id NOT IN ($placeholders) 
                     LIMIT 10";
-    
+
             $stmt = $this->db->prepare($sql);
-    
+
             foreach ($excludeIds as $index => $id) {
                 $stmt->bindValue($index + 1, $id, PDO::PARAM_INT);
             }
@@ -198,16 +198,15 @@ class Friends
             $stmt->execute();
 
             $suggestions = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
             return $suggestions;
-    
         } catch (\PDOException $e) {
             echo "SQL Error: " . $e->getMessage();
         }
     }
-    
 
-    private function flattenArray($array) {
+    private function flattenArray($array)
+    {
         $result = [];
         foreach ($array as $item) {
             if (is_array($item)) {
@@ -219,4 +218,3 @@ class Friends
         return $result;
     }
 }
-

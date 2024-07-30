@@ -5,19 +5,15 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Database;
 use App\Middlewares\AuthMiddleware;
-use App\Models\User;
 use App\Models\Message;
 
 class MessageController extends Controller
 {
-    private $userModel;
     private $model;
 
     public function __construct()
     {
         $db = new Database();
-
-        $this->userModel = new User($db->getConnection());
         $this->model = new Message($db->getConnection());
     }
 

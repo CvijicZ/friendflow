@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Middlewares\AuthMiddleware;
 use PDO;
-use Exception;
 
 class User
 {
@@ -29,26 +28,21 @@ class User
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
     public function create($name, $surname, $email, $birthday, $password)
     {
-        try {
-            $sql = "INSERT INTO users(name, surname, email, birthday, password) VALUES(:name, :surname, :email, :birthday, :password)";
-            $stmt = $this->db->prepare($sql);
+        $sql = "INSERT INTO users(name, surname, email, birthday, password) VALUES(:name, :surname, :email, :birthday, :password)";
+        $stmt = $this->db->prepare($sql);
 
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-            $stmt->bindParam(':name', $name);
-            $stmt->bindParam(':surname', $surname);
-            $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':password', $hashedPassword);
-            $stmt->bindParam(':birthday', $birthday);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':surname', $surname);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':password', $hashedPassword);
+        $stmt->bindParam(':birthday', $birthday);
 
-            $stmt->execute();
-
-            return true;
-        } catch (Exception $e) {
-            return false;
-        }
+        return $stmt->execute();
     }
 
     public function getEmailById($id)
@@ -59,6 +53,7 @@ class User
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_COLUMN);
     }
+
     public function update($name, $surname, $email, $birthDate, $password = null)
     {
         $userId = $_SESSION['user_id'];

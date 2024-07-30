@@ -19,6 +19,7 @@ class AuthController extends Controller
         $this->db = $db->getConnection();
         $this->jwt=new JWTService();
     }
+
     public function login()
     {
         $email = trim($_POST['email'] ?? '');
@@ -73,6 +74,7 @@ class AuthController extends Controller
     {
         $this->view('auth/register');
     }
+    
     public function showLoginForm()
     {
         $this->view('auth/login');
@@ -92,7 +94,6 @@ class AuthController extends Controller
    
     public function register()
     {
-
         $name = trim($_POST['name']);
         $surname = trim($_POST['surname']);
         $email = trim($_POST['email']);

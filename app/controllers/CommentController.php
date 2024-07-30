@@ -11,7 +11,6 @@ class CommentController extends Controller
     private $model;
     private $validator;
 
-
     public function __construct()
     {
         $db = new Database();

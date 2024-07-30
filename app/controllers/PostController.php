@@ -6,7 +6,6 @@ use App\Validation\PostValidation;
 use App\Core\Flash;
 use App\Core\Database;
 use App\Models\Post;
-use App\Models\Comment;
 use App\Core\Controller;
 use App\Middlewares\CSRFMiddleware;
 use Exception;
@@ -15,14 +14,14 @@ class PostController extends Controller
 {
     private $model;
     private $validator;
-    private $commentModel;
+
     public function __construct()
     {
         $db = new Database();
         $this->model = new Post($db->getConnection());
         $this->validator = new PostValidation($db->getConnection());
-        $this->commentModel=new Comment($db->getConnection());
     }
+
     public function create()
     {
         $content = $_POST['post_text'];
@@ -57,6 +56,7 @@ class PostController extends Controller
         header("Location: /friendflow");
         exit();
     }
+
     public function delete($id, $_token)
     {
         if (CSRFMiddleware::compare($_token)) {

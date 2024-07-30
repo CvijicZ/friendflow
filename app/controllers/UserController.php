@@ -80,6 +80,7 @@ class UserController extends Controller
             exit();
         }
     }
+    
     public function updateProfile()
     {
         AuthMiddleware::handle();
