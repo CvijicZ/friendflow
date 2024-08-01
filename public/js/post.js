@@ -19,11 +19,12 @@ export function addComment(postId, content, csrfToken) {
                 }
             },
             error: function (xhr, status, error) {
-                console.error('Error occurred during delete:', error);
+                console.error('Error occurred during:', error);
             }
         });
     });
 }
+
 export function updatePost(postIdToUpdate, currentText) {
     // Create input field and move cursor to the end of the text
     $('#post-content-' + postIdToUpdate).replaceWith('<input type="text" class="form-control edit-input" id="edit-input-' + postIdToUpdate + '" value="' + currentText + '">');
@@ -90,8 +91,8 @@ export function deletePost(postIdToDelete) {
             }
         });
     });
-
 }
+
 function getComments(postId) {
     return new Promise((resolve, reject) => {
 
@@ -121,19 +122,20 @@ function getComments(postId) {
     });
 }
 
-export function regenerateCommentSection(postId) {
+// countComments tells the function if it needs to update number of comments displayed on the homepage
+export function generateCommentSection(postId, countComments = false) {
     getComments(postId)
         .then(comments => {
             clearCommentContent(postId);
-            createCommentElements(comments, postId);
+            createCommentElements(comments, postId, countComments);
         })
         .catch(error => {
             console.log(error);
         });
 }
 
-export function convertAllPostsDates(){
-    $('.post_date').each(function() {
+export function convertAllPostsDates() {
+    $('.post_date').each(function () {
         const datetime = $(this).data('datetime');
         const humanReadable = moment(datetime).fromNow();
         $(this).text(humanReadable);
@@ -141,18 +143,17 @@ export function convertAllPostsDates(){
 }
 
 function clearCommentContent(comment_id) {
-    $('#comments_' + comment_id).remove();
+    $('#comments_' + comment_id).empty();
 }
 
-function createCommentElements(comments, postId) {
+function createCommentElements(comments, postId, countComments) {
     let allComments = comments.comments;
 
-    allComments.sort(function (a, b) {
+    allComments.sort(function (b, a) {
         return new Date(a.created_at) - new Date(b.created_at);
     });
 
     let commentContainerHtml = `
-        <div class="collapse" id="comments_${postId}">
             <div class="card card-body mt-3 bg-secondary text-light">
     `;
 
@@ -176,10 +177,13 @@ function createCommentElements(comments, postId) {
     commentContainerHtml += `<div class="mt-3 comment-form" data-post-id="${postId}">
                                     <textarea class="form-control comment-content" rows="2" placeholder="Add a comment..."></textarea>
                                     <button class="btn btn-primary mt-2 add-comment">Post Comment</button>
-                                </div></div></div> `;
+                                </div></div> `;
 
-    $('#post-' + postId).append(commentContainerHtml);
-    updateNumberOfComments(postId, allComments.length);
+    $('#comments_' + postId).append(commentContainerHtml);
+
+    if (countComments) {
+        updateNumberOfComments(postId, allComments.length);
+    }
 }
 
 function updateNumberOfComments(postId, newNumber) {

@@ -7,7 +7,6 @@ use PDO;
 use App\Models\User;
 use App\Models\Friends;
 
-
 class Post
 {
     protected $db;
@@ -106,15 +105,9 @@ class Post
 
         foreach ($posts as &$post) {
             $post['user'] = $this->userModel->show($post['user_id']);
-            $comments = $this->commentModel->index($post['id']);
             $post['numberofComments'] = $this->countComments($post['id']);
-
-            foreach ($comments as &$comment) {
-                $comment['user'] = $this->userModel->show($comment['user_id']);
-            }
-
-            $post['comments'] = $comments;
         }
+
         return $posts;
     }
 
@@ -146,7 +139,6 @@ class Post
             }
 
             $post['comments'] = $comments;
-        
 
         return $post;
     }

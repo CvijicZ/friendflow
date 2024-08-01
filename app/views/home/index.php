@@ -89,63 +89,42 @@
                 <div class="card mb-3 w-auto bg-secondary text-light" id="post-<?= $post['id'] ?>">
 
                     <div class="card-body">
-                    <div class="media">
-    <!-- If post is created by auth user show options -->
-    <?php if ($post['user_id'] == $_SESSION['user_id']) : ?>
-        <div class="dropdown" style="position: absolute; top: 10px; right: 10px;">
-            <button class="btn btn-dark p-1" type="button" id="dropdownMenuButton<?= $post['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-ellipsis-h"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right text-center mx-auto bg-dark" aria-labelledby="dropdownMenuButton<?= $post['id'] ?>">
-                <button type="button" class="btn btn-outline-primary edit-btn" data-post-id="<?= $post['id'] ?>">Edit</button>
-                <button type="button" class="btn btn-outline-danger delete-btn" data-post-id="<?= $post['id'] ?>">Delete</button>
-            </div>
-        </div>
-    <?php endif; ?>
-    <img src="app/storage/images/profile_images/<?= htmlspecialchars($post['user']['profile_image_name']) ?>" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
-    <div class="media-body">
-        <h5 class="mt-0 text-dark">
-            <?= htmlspecialchars($post['user']['name']) . " " . htmlspecialchars($post['user']['surname']) ?>
-        </h5>
-        <small class="post_date text-dark" data-datetime="<?= $post['created_at'] ?>" style="display:block;margin-top:0;font-size:11px;"></small>
-        <p style="font-weight:bold;" class="border-bottom" id="post-content-<?= $post['id'] ?>">
-            <?= htmlspecialchars($post['content']) ?>
-        </p>
+                        <div class="media">
+                            <!-- If post is created by auth user show options -->
+                            <?php if ($post['user_id'] == $_SESSION['user_id']) : ?>
+                                <div class="dropdown" style="position: absolute; top: 10px; right: 10px;">
+                                    <button class="btn btn-dark p-1" type="button" id="dropdownMenuButton<?= $post['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right text-center mx-auto bg-dark" aria-labelledby="dropdownMenuButton<?= $post['id'] ?>">
+                                        <button type="button" class="btn btn-outline-primary edit-btn" data-post-id="<?= $post['id'] ?>">Edit</button>
+                                        <button type="button" class="btn btn-outline-danger delete-btn" data-post-id="<?= $post['id'] ?>">Delete</button>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            <img src="app/storage/images/profile_images/<?= htmlspecialchars($post['user']['profile_image_name']) ?>" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
+                            <div class="media-body">
+                                <h5 class="mt-0 text-dark">
+                                    <?= htmlspecialchars($post['user']['name']) . " " . htmlspecialchars($post['user']['surname']) ?>
+                                </h5>
+                                <small class="post_date text-dark" data-datetime="<?= $post['created_at'] ?>" style="display:block;margin-top:0;font-size:11px;"></small>
+                                <p style="font-weight:bold;" class="border-bottom" id="post-content-<?= $post['id'] ?>">
+                                    <?= htmlspecialchars($post['content']) ?>
+                                </p>
 
-        <?php if (!empty($post['image_name'])) : ?>
-            <div class="post-image-container">
-                <img src="app/storage/images/post_images/<?= htmlspecialchars($post['image_name']) ?>" class="post-image" alt="Post Image">
-            </div>
-        <?php endif; ?>
-    </div>
-</div>
-                        <button class="btn btn-primary mt-3" type="button" data-toggle="collapse" data-target="#comments_<?= $post['id'] ?>" aria-expanded="false" aria-controls="commentsSection">
+                                <?php if (!empty($post['image_name'])) : ?>
+                                    <div class="post-image-container">
+                                        <img src="app/storage/images/post_images/<?= htmlspecialchars($post['image_name']) ?>" class="post-image" alt="Post Image">
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary mt-3 comments-button" type="button" data-toggle="collapse" data-target="#comments_<?= $post['id'] ?>" aria-expanded="false" aria-controls="commentsSection">
                             Comments <i class="fa-regular fa-comment"></i> <span id="number_of_comments_<?= $post['id'] ?>"><?= $post['numberofComments'] ?></span>
                         </button>
-
                         <div class="collapse" id="comments_<?= $post['id'] ?>">
-                            <div class="card card-body mt-3 bg-secondary text-light">
-
-                                <?php foreach ($post['comments'] as $comment) : ?>
-
-                                    <div class="media mb-3">
-                                        <img src="app/storage/images/profile_images/<?= htmlspecialchars($comment['user']['profile_image_name']) ?>" class="mr-3 rounded-circle" alt="Commenter Profile" style="width:48px;height:48px;">
-                                        <div class="media-body">
-                                            <h6 class="mt-0">
-                                                <?= htmlspecialchars($comment['user']['name']) . " " . htmlspecialchars($comment['user']['surname']) ?>
-                                            </h6>
-                                            <p><?= htmlspecialchars($comment['content']) ?></p>
-                                        </div>
-                                    </div>
-                                    <hr class="bg-light">
-
-                                <?php endforeach; ?>
-
-                                <div class="mt-3 comment-form" data-post-id="<?= $post['id'] ?>">
-                                    <textarea class="form-control comment-content" rows="2" placeholder="Add a comment..."></textarea>
-                                    <button class="btn btn-primary mt-2 add-comment">Post Comment</button>
-                                </div>
-                            </div>
+                            <!-- Comments loaded from AJAX will be here -->
+                            <p class="text-center" id="loading-message_<?= $post['id'] ?>">Loading comments...</p>
                         </div>
                     </div>
                 </div>
@@ -184,7 +163,6 @@
         </div>
     </div>
 </div>
-
 
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">

@@ -2,7 +2,7 @@
 import { initChat, getNumberOfUnseenMessages, createFriendsModal, showMessage, updateChatPositions } from '/friendflow/public/js/chat.js';
 import { initializeObserver } from '/friendflow/public/js/observer.js';
 import { initWebSockets, sendMessage, sendComment } from '/friendflow/public/js/websockets.js';
-import { deletePost, updatePost, addComment, regenerateCommentSection, convertAllPostsDates } from '/friendflow/public/js/post.js';
+import { deletePost, updatePost, addComment, generateCommentSection, convertAllPostsDates } from '/friendflow/public/js/post.js';
 import { addFriend, acceptFriendRequest } from '/friendflow/public/js/friend.js';
 
 
@@ -15,6 +15,30 @@ $(document).ready(function () {
 
     convertAllPostsDates(); // On load convert datetimes to human readable
     setInterval(convertAllPostsDates, 60000); // After initial convert, update that times every 60 seconds
+
+    $('.comments-button').on('click', function () {
+        let postId = $(this).data('target').replace('#comments_', '');
+        let numberOfComments = $('#number_of_comments_' + postId).text();
+        let commentsDiv = $('#comments_' + postId);
+
+        if ($('#comments_' + postId).hasClass('show')) { // If comments element has class show that means that user is closing element (no need to create another request)
+            return;
+        }
+
+        if (numberOfComments < 1) {
+            commentsDiv.html(
+                '<p class="text-center">Be first to comment on this post</p>' +
+                '<div class="mt-3 comment-form" data-post-id="' + postId + '">' +
+                '<textarea class="form-control comment-content" rows="2" placeholder="Add a comment..."></textarea>' +
+                '<button class="btn btn-primary mt-2 add-comment">Post Comment</button>' +
+                '</div>'
+            );
+        }
+        else {
+            // Implement logic to load and display comments :)
+            generateCommentSection(postId);
+        }
+    });
 
     // Chat related functions, script: chat.js
     $(document).on('click', '#friendRequestsBtn', function () {
@@ -63,14 +87,14 @@ $(document).ready(function () {
 
     // ** Posts related functions, script: post.js
     // Add comment TODO: there is too much logic just for animation to be shown, fix it
-    $(".add-comment").click(function () {
+    $(document).on('click', '.add-comment', function () {
         let postId = $(this).closest('div').data('post-id');
         let content = $(this).closest('div').find('.comment-content').val();
         let csrfToken = $('meta[name="csrf-token"]').attr('content');
 
         addComment(postId, content, csrfToken)
             .then(result => {
-                regenerateCommentSection(postId);
+                generateCommentSection(postId);
                 sendComment(postId);
             })
     });

@@ -3,11 +3,11 @@ let websocket;
 
 import { showMessage } from '/friendflow/public/js/chat.js';
 import { initializeObserver } from '/friendflow/public/js/observer.js';
-import { regenerateCommentSection } from '/friendflow/public/js/post.js';
+import { generateCommentSection } from '/friendflow/public/js/post.js';
 
 export function initWebSockets() {
 
-    const WS_IP = "192.168.1.6"; // Put your ws server IP
+    const WS_IP = "192.168.1.3"; // Put your ws server IP
     const WS_PORT = "8080"; // Put the port used for ws
     const WS_ADDRESS = WS_IP + ":" + WS_PORT; // Don't change this
 
@@ -43,7 +43,13 @@ export function initWebSockets() {
                 break;
 
             case 'newComment':
-                regenerateCommentSection(data.postId);
+                let commentForm=$('[data-post-id="' + data.postId + '"]');
+                let textarea = commentForm.find('textarea');
+
+                if(textarea.val().trim() !== ''){ // If user is writing comment do not regenerate comment section
+                    return;
+                }
+                generateCommentSection(data.postId, true);
 
                 break;
 
