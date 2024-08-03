@@ -85,21 +85,29 @@ class Post
         return $stmt->execute();
     }
 
-    public function getPostsFromFriends($userId)
+    // TODO: overcomplicated function, create another function that catches all posts from one person
+              // then with foreach catch all posts from friends and concat results in one array and return it
+                // Do not forget to sort merged array by created_at
+    public function getPostsFromFriends($userId, $limit, $offset)
     {
         $friends = $this->friendsModel->getAllFriends($userId);
-        $friends[] = AuthMiddleware::getUserId(); // Add and users id to get his own posts
+        $friends[] = AuthMiddleware::getUserId(); // Add user's own id to get their own posts
 
         if (empty($friends)) {
             return [];
         }
-
         $placeholders = rtrim(str_repeat('?,', count($friends)), ',');
-
-        $sql = "SELECT * FROM posts WHERE user_id IN ($placeholders) ORDER BY created_at DESC";
+        $sql = "SELECT * FROM posts WHERE user_id IN ($placeholders) ORDER BY created_at DESC LIMIT ? OFFSET ?";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->execute($friends);
+        foreach ($friends as $k => $friend) {
+            $stmt->bindValue(($k + 1), $friend);
+        }
+
+        $stmt->bindValue(count($friends) + 1, (int)$limit, PDO::PARAM_INT);
+        $stmt->bindValue(count($friends) + 2, (int)$offset, PDO::PARAM_INT);
+
+        $stmt->execute();
 
         $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -132,19 +140,20 @@ class Post
         $stmt->execute();
         $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $comments = $this->commentModel->index($post['id']);
+        $comments = $this->commentModel->index($post['id']);
 
-            foreach ($comments as &$comment) {
-                $comment['user'] = $this->userModel->show($comment['user_id']);
-            }
+        foreach ($comments as &$comment) {
+            $comment['user'] = $this->userModel->show($comment['user_id']);
+        }
 
-            $post['comments'] = $comments;
+        $post['comments'] = $comments;
 
         return $post;
     }
 
-    public function getCreator($postId){
-        $postInfo=$this->show($postId);
+    public function getCreator($postId)
+    {
+        $postInfo = $this->show($postId);
         return $postInfo['user_id'];
     }
 }

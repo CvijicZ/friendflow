@@ -13,17 +13,52 @@ $(document).ready(function () {
     initializeObserver();
     initChat();
 
-    convertAllPostsDates(); // On load convert datetimes to human readable
-    setInterval(convertAllPostsDates, 60000); // After initial convert, update that times every 60 seconds
+    setInterval(convertAllPostsDates, 60000); // Converts posts created_at to human readable, updates every 1 min
 
-    loadPosts()
-        .then(posts => {
-            displayPosts(posts);
-            $('#load-posts-message').remove();
-        })
-        .catch(error => {
-            showAlert(error.message, "danger");
-        });
+    // Pagination for loading posts, TODO: make this logic modular, so it can be reused for loading comments
+    let offset = 0;
+    const limit = 10;
+    let isLoading = false;
+
+    function handlePostsScroll() {
+        const mainContent = $('.main-content');
+        const scrollTop = mainContent.scrollTop();
+        const scrollHeight = mainContent.prop('scrollHeight');
+        const innerHeight = mainContent.innerHeight();
+
+        if (!isLoading && scrollTop + innerHeight >= scrollHeight - 1) {
+            isLoading = true;
+            offset += limit;
+            loadPosts(limit, offset)
+                .then(posts => {
+                    displayPosts(posts);
+                    convertAllPostsDates();
+                    isLoading = false;
+                })
+                .catch(error => {
+                    console.log(error.message);
+                    isLoading = false;
+                });
+        }
+    }
+
+    function getPosts() {
+        loadPosts(limit, offset)
+            .then(posts => {
+                displayPosts(posts);
+                $('#load-posts-message').remove();
+                convertAllPostsDates();
+            })
+            .catch(error => {
+                showAlert(error.message, "danger");
+            });
+    }
+
+    getPosts(); // Initial load posts
+
+    $('.main-content').on('scroll', handlePostsScroll);
+    // End of posts pagination
+
 
     $(document).on('click', '.comments-button', function () {
         let postId = $(this).data('target').replace('#comments_', '');
@@ -109,13 +144,13 @@ $(document).ready(function () {
     });
 
     // Post delete
-    $(".delete-btn").click(function () {
+    $(document).on('click', '.delete-btn', function () {
         let postIdToDelete = $(this).data('post-id');
         $('#deleteModal').modal('show');
         deletePost(postIdToDelete);
     });
     // Update post request
-    $('.edit-btn').click(function () {
+    $(document).on('click', '.edit-btn', function () {
         let postIdToUpdate = $(this).data('post-id');
         let currentText = $('#post-content-' + postIdToUpdate).text().trim();
 
@@ -321,15 +356,15 @@ function showAlert(message, type = 'success') {
 
 function displayPosts(posts) {
     const $container = $('#posts-container');
-    const userId = $('#auth-user-id');
+    const userId = $('#auth-user-id').val();
 
     posts.forEach(post => {
         const postHtml = `
-            <div class="card mb-3 w-auto bg-secondary text-light" id="post-${post.id}">
+            <div class="card mb-3 w-auto bg-secondary text-light single-post" id="post-${post.id}">
                 <div class="card-body">
                     <div class="media">
                         <!-- If post is created by auth user show options -->
-                        ${post.user_id === userId ? `
+                        ${post.user_id == userId ? `
                             <div class="dropdown" style="position: absolute; top: 10px; right: 10px;">
                                 <button class="btn btn-dark p-1" type="button" id="dropdownMenuButton${post.id}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fas fa-ellipsis-h"></i>

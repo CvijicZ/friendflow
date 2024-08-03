@@ -130,8 +130,10 @@ class PostController extends Controller
         header('Content-Type: application/json; charset=utf-8');
 
         $userId = AuthMiddleware::getUserId();
+        $limit=$_POST['limit'];
+        $offset=$_POST['offset'];
 
-        $posts = $this->model->getPostsFromFriends($userId);
+        $posts = $this->model->getPostsFromFriends($userId, $limit, $offset);
 
         if ($posts) {
             echo json_encode(['status' => "success", 'posts' => $posts]);

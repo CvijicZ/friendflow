@@ -93,7 +93,7 @@ export function deletePost(postIdToDelete) {
     });
 }
 
-export function loadPosts() {
+export function loadPosts(limit, offset) {
 
     return new Promise((resolve, reject) => {
         let csrfToken = $('meta[name="csrf-token"]').attr('content');
@@ -102,6 +102,8 @@ export function loadPosts() {
             url: '/friendflow/get-posts',
             method: 'POST',
             data: {
+                limit:limit,
+                offset:offset,
                 csrf_token: csrfToken
             },
             success: function (response) {
