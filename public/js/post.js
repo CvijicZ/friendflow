@@ -93,6 +93,32 @@ export function deletePost(postIdToDelete) {
     });
 }
 
+export function loadPosts() {
+
+    return new Promise((resolve, reject) => {
+        let csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+        $.ajax({
+            url: '/friendflow/get-posts',
+            method: 'POST',
+            data: {
+                csrf_token: csrfToken
+            },
+            success: function (response) {
+                if (response.status == "success") {
+                    resolve(response.posts);
+                }
+                if (response.status == "error") {
+                    reject(response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                reject(error);
+            }
+        });
+    });
+}
+
 function getComments(postId) {
     return new Promise((resolve, reject) => {
 

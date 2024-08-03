@@ -27,6 +27,7 @@ return  [
         '/comment' => 'App\Controllers\CommentController@create',
         '/upload-profile-image' => 'App\Controllers\UserController@uploadProfileImage',
         '/get-comments' => 'App\Controllers\PostController@getComments',
+        '/get-posts' => 'App\Controllers\PostController@getPosts',
         // HTTP requests related to the friend requests
         '/add-friend' => 'App\Controllers\FriendsController@addFriend',
         '/get-friend-requests' => 'App\Controllers\FriendsController@getFriendRequests',

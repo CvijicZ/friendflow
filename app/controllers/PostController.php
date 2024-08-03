@@ -7,6 +7,7 @@ use App\Core\Flash;
 use App\Core\Database;
 use App\Models\Post;
 use App\Core\Controller;
+use App\Middlewares\AuthMiddleware;
 use App\Middlewares\CSRFMiddleware;
 use Exception;
 
@@ -122,5 +123,22 @@ class PostController extends Controller
             echo json_encode(['status' => "error", 'message' => "Unexpected error"]);
             exit();
         }
+    }
+
+    public function getPosts()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $userId = AuthMiddleware::getUserId();
+
+        $posts = $this->model->getPostsFromFriends($userId);
+
+        if ($posts) {
+            echo json_encode(['status' => "success", 'posts' => $posts]);
+            exit();
+        }
+
+        echo json_encode(['status' => "error", 'message' => "No posts to show"]);
+        exit();
     }
 }

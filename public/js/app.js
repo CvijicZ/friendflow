@@ -2,7 +2,7 @@
 import { initChat, getNumberOfUnseenMessages, createFriendsModal, showMessage, updateChatPositions } from '/friendflow/public/js/chat.js';
 import { initializeObserver } from '/friendflow/public/js/observer.js';
 import { initWebSockets, sendMessage, sendComment } from '/friendflow/public/js/websockets.js';
-import { deletePost, updatePost, addComment, generateCommentSection, convertAllPostsDates } from '/friendflow/public/js/post.js';
+import { deletePost, updatePost, addComment, generateCommentSection, convertAllPostsDates, loadPosts } from '/friendflow/public/js/post.js';
 import { addFriend, acceptFriendRequest } from '/friendflow/public/js/friend.js';
 
 
@@ -16,12 +16,21 @@ $(document).ready(function () {
     convertAllPostsDates(); // On load convert datetimes to human readable
     setInterval(convertAllPostsDates, 60000); // After initial convert, update that times every 60 seconds
 
-    $('.comments-button').on('click', function () {
+    loadPosts()
+        .then(posts => {
+            displayPosts(posts);
+            $('#load-posts-message').remove();
+        })
+        .catch(error => {
+            showAlert(error.message, "danger");
+        });
+
+    $(document).on('click', '.comments-button', function () {
         let postId = $(this).data('target').replace('#comments_', '');
         let numberOfComments = $('#number_of_comments_' + postId).text();
         let commentsDiv = $('#comments_' + postId);
 
-        if ($('#comments_' + postId).hasClass('show')) { // If comments element has class show that means that user is closing element (no need to create another request)
+        if (commentsDiv.hasClass('show')) { // If comments element has class show that means that user is closing element (no need to create another request)
             return;
         }
 
@@ -308,4 +317,57 @@ function showAlert(message, type = 'success') {
     setTimeout(function () {
         $alert.alert('close');
     }, 5000);
+}
+
+function displayPosts(posts) {
+    const $container = $('#posts-container');
+    const userId = $('#auth-user-id');
+
+    posts.forEach(post => {
+        const postHtml = `
+            <div class="card mb-3 w-auto bg-secondary text-light" id="post-${post.id}">
+                <div class="card-body">
+                    <div class="media">
+                        <!-- If post is created by auth user show options -->
+                        ${post.user_id === userId ? `
+                            <div class="dropdown" style="position: absolute; top: 10px; right: 10px;">
+                                <button class="btn btn-dark p-1" type="button" id="dropdownMenuButton${post.id}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right text-center mx-auto bg-dark" aria-labelledby="dropdownMenuButton${post.id}">
+                                    <button type="button" class="btn btn-outline-primary edit-btn" data-post-id="${post.id}">Edit</button>
+                                    <button type="button" class="btn btn-outline-danger delete-btn" data-post-id="${post.id}">Delete</button>
+                                </div>
+                            </div>
+                        ` : ''}
+                        <img src="app/storage/images/profile_images/${post.user.profile_image_name}" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
+                        <div class="media-body">
+                            <h5 class="mt-0 text-dark">
+                                ${post.user.name} ${post.user.surname}
+                            </h5>
+                            <small class="post_date text-dark" data-datetime="${post.created_at}" style="display:block;margin-top:0;font-size:11px;"></small>
+                            <p style="font-weight:bold;" class="border-bottom" id="post-content-${post.id}">
+                                ${post.content}
+                            </p>
+                            ${post.image_name ? `
+                                <div class="post-image-container">
+                                    <img src="app/storage/images/post_images/${post.image_name}" class="post-image" alt="Post Image">
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-3 comments-button" type="button" data-toggle="collapse" data-target="#comments_${post.id}" aria-expanded="false" aria-controls="commentsSection">
+                        Comments <i class="fa-regular fa-comment"></i> <span id="number_of_comments_${post.id}">${post.numberofComments}</span>
+                    </button>
+                    <div class="collapse" id="comments_${post.id}">
+                        <!-- Comments loaded from AJAX will be here -->
+                        <p class="text-center" id="loading-message_${post.id}">Loading comments...</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Append the generated HTML to the container
+        $container.append(postHtml);
+    });
 }
