@@ -74,9 +74,10 @@ class MessageController extends Controller
         }
 
         $messages = $this->model->getMessages($userId, $friendId, $limit, $offset);
+        $sanitizedMessages = $this->sanitizeArray($messages);
 
         if ($messages) {
-            echo json_encode(['status' => "success", "messages" => $messages]);
+            echo json_encode(['status' => "success", "messages" => $sanitizedMessages]);
             exit();
         }
         echo json_encode(['status' => "error", "message" => "No messages found"]);

@@ -24,12 +24,12 @@ class HomeController extends Controller
             $userInfo = $userModel->show($_SESSION['user_id']);
             $friendSuggestions = $friendsModel->getFriendSuggestions(AuthMiddleware::getUserId());
 
-            $this->view('home/index', ['auth_user' => $userInfo, 'suggested_friends' => $friendSuggestions]);
+            $this->view('home/index', ['auth_user' => $this->sanitizeArray($userInfo), 'suggested_friends' => $this->sanitizeArray($friendSuggestions)]);
         } else {
             $this->view('home/guest-index');
         }
     }
-    
+
     public function error()
     {
         $this->view('home/error');

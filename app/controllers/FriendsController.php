@@ -39,7 +39,8 @@ class FriendsController extends Controller
         }
 
         if ($allFriendsInfo) {
-            echo json_encode(['status' => "success", "data" => $allFriendsInfo]);
+            $sanitizedFriendsInfo=$this->sanitizeArray($allFriendsInfo);
+            echo json_encode(['status' => "success", "data" => $sanitizedFriendsInfo]);
             exit();
         }
         echo json_encode(['status' => "error", "message" => "No friends found."]);
@@ -111,7 +112,7 @@ class FriendsController extends Controller
                 ];
                 $dataToReturn[] = $requestData;
             }
-            echo json_encode(['status' => "success", "data" => $dataToReturn]);
+            echo json_encode(['status' => "success", "data" => $this->sanitizeArray($dataToReturn)]);
             exit();
         } else {
             echo json_encode(['status' => "error", "message" => "No friend requests"]);

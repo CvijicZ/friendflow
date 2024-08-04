@@ -166,11 +166,11 @@ class Chat implements MessageComponentInterface
             $payload = json_encode([
                 'type' => 'newMessage',
                 'id' => $messageId,
-                'message' => $message,
+                'message' => htmlspecialchars($message),
                 'senderId' => $senderId,
-                'senderName' => $senderData['name'],
-                'senderSurname' => $senderData['surname'],
-                'senderImageName' => $senderData['profile_image_name']
+                'senderName' => htmlspecialchars($senderData['name']),
+                'senderSurname' => htmlspecialchars($senderData['surname']),
+                'senderImageName' => htmlspecialchars($senderData['profile_image_name'])
             ]);
 
             $this->updateNumberOfUnseenMessages($recipientId);

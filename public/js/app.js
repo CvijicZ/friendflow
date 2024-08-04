@@ -46,11 +46,11 @@ $(document).ready(function () {
         loadPosts(limit, offset)
             .then(posts => {
                 displayPosts(posts);
-                $('#load-posts-message').remove();
+                $('#load-posts-message').empty();
                 convertAllPostsDates();
             })
             .catch(error => {
-                showAlert(error.message, "danger");
+                $('#load-posts-message').text("No posts to be shown");
             });
     }
 
@@ -167,7 +167,7 @@ $(document).ready(function () {
         let csrfToken = $('meta[name="csrf-token"]').attr('content');
 
         let friendName = chatBox.find('#chat-friend-name').text();
-        let friendImage = "https://via.placeholder.com/40";
+        let friendImage = $('#friend-image_'+friendId).attr('src');
 
         let scrollTop = chatBox.find('.messages').scrollTop();
         let initialHeight = chatBox.find('.messages')[0].scrollHeight;
@@ -199,7 +199,7 @@ $(document).ready(function () {
                     function appendMessages(messages, prepend) {
                         messages.forEach(function (message) {
                             let senderName = message.sender_id == userId ? 'You' : friendName;
-                            let senderImage = message.sender_id == userId ? "https://via.placeholder.com/40" : friendImage;
+                            let senderImage = message.sender_id == userId ? "app/storage/images/profile_images/" + $('#auth-user-image-name').val() : friendImage;
                             let senderId = message.sender_id == userId ? userId : friendId;
 
                             let messageHtml = showMessage(chatBox, message.message, senderId, senderName, senderImage, prepend);
@@ -269,7 +269,7 @@ $(document).ready(function () {
             '<div class="chat-box" data-id="' + friendId + '">' +
             '<div class="chat-header">' +
             '<div class="d-flex align-items-center">' +
-            '<img src="' + friendImage + '" alt="Friend">' +
+            '<img src="' + friendImage + '" alt="Friend" id="friend-image_' + friendId +'">' +
             '<span id="chat-friend-name">' + friendName + '</span>' +
             '</div>' +
             '<div class="close-chat">&times;</div>' +

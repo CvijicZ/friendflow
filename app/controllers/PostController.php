@@ -117,7 +117,7 @@ class PostController extends Controller
 
             $comments = $this->model->getComments($postId);
 
-            echo json_encode(['status' => "success", 'comments' => $comments]);
+            echo json_encode(['status' => "success", 'comments' => $this->sanitizeArray($comments)]);
             exit();
         } catch (Exception $e) {
             echo json_encode(['status' => "error", 'message' => "Unexpected error"]);
@@ -136,7 +136,7 @@ class PostController extends Controller
         $posts = $this->model->getPostsFromFriends($userId, $limit, $offset);
 
         if ($posts) {
-            echo json_encode(['status' => "success", 'posts' => $posts]);
+            echo json_encode(['status' => "success", 'posts' => $this->sanitizeArray($posts)]);
             exit();
         }
 
