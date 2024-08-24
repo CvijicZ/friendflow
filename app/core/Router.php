@@ -8,8 +8,7 @@ use App\Middlewares\CSRFMiddleware;
 
 class Router
 {
-    private $routes =[];
-
+    private $routes = [];
     private $baseUri = '/friendflow';
     private $db;
 
@@ -65,6 +64,7 @@ class Router
         http_response_code(404);
         echo "404 Not Found";
     }
+
     private function removeBaseUri($uri)
     {
         $baseUri = rtrim($this->baseUri, '/') . '/';
@@ -73,6 +73,7 @@ class Router
         }
         return $uri;
     }
+
     private function handleMiddleware($middleware)
     {
         switch ($middleware) {
@@ -81,18 +82,24 @@ class Router
                 break;
         }
     }
+
     private function callAction($controllerAction, $params = [])
     {
         list($controller, $action) = explode('@', $controllerAction);
+
+        if (strpos($controller, 'App\Controllers\\') === false) {
+            $controller = 'App\Controllers\\' . $controller;
+        }
+
         $controller = new $controller($this->db);
 
-        // Make sure params are passed as positional arguments
         if (!empty($params)) {
             call_user_func_array([$controller, $action], $params);
         } else {
             $controller->$action();
         }
     }
+
     private function matchRoute($uri, $method)
     {
         foreach ($this->routes[$method] as $route => $config) {

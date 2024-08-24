@@ -14,7 +14,10 @@
             "App\\Models\\": "app/models/",
             "App\\Validation\\": "app/validation/",
             "App\\Migrations\\": "app/migrations/",
-            "App\\Services\\": "app/services"
+            "App\\Services\\": "app/services",
+            "App\\Controllers\\Api\\": "app/api/controllers",
+            "App\\Api\\": "app/api"
+
         }
     }
 }

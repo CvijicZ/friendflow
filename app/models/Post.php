@@ -88,10 +88,10 @@ class Post
     // TODO: overcomplicated function, create another function that catches all posts from one person
               // then with foreach catch all posts from friends and concat results in one array and return it
                 // Do not forget to sort merged array by created_at
-    public function getPostsFromFriends($userId, $limit, $offset)
+    public function getPostsFromFriends($userId, $limit, $offset, $apiRequest=false)
     {
         $friends = $this->friendsModel->getAllFriends($userId);
-        $friends[] = AuthMiddleware::getUserId(); // Add user's own id to get their own posts
+        $friends[] = $userId; // Add user's own id to get their own posts
 
         if (empty($friends)) {
             return [];

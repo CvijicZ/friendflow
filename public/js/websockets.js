@@ -7,7 +7,7 @@ import { generateCommentSection } from '/friendflow/public/js/post.js';
 
 export function initWebSockets() {
 
-    const WS_IP = "192.168.1.3"; // Put your ws server IP
+    const WS_IP = "192.168.1.8"; // Put your ws server IP
     const WS_PORT = "8080"; // Put the port used for ws
     const WS_ADDRESS = WS_IP + ":" + WS_PORT; // Don't change this
 

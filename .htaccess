@@ -18,3 +18,10 @@ RewriteRule ^migrate.php - [F]
     php_flag display_startup_errors on
     php_value error_reporting E_ALL & ~E_NOTICE
 </IfModule>
+
+# Enables CORS
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, DELETE, PUT"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+</IfModule>

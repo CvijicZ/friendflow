@@ -46,5 +46,28 @@ return  [
     'DELETE' => [
         '/profile' => ['middleware' => 'auth', 'controller' => 'App\Controllers\UserController@delete'],
         '/post' => ['middleware' => 'auth', 'controller' => 'App\Controllers\PostController@delete'],
-    ]
+    ],
+    // Routes for API calls
+    'API' => [
+        'GET' => [
+            '/users' => 'App\Controllers\Api\UserController@index',
+            '/posts' => 'App\Controllers\Api\PostController@index',
+            '/comments' => 'App\Controllers\Api\CommentController@index',
+        ],
+        'POST' => [
+            '/users' => 'App\Controllers\Api\UserController@store',
+            '/posts' => 'App\Controllers\Api\PostController@store',
+            '/comments' => 'App\Controllers\Api\CommentController@store',
+        ],
+        'PUT' => [
+            '/users/{id}' => 'App\Controllers\Api\UserController@update',
+            '/posts/{id}' => 'App\Controllers\Api\PostController@update',
+            '/comments/{id}' => 'App\Controllers\Api\CommentController@update',
+        ],
+        'DELETE' => [
+            '/users/{id}' => 'App\Controllers\Api\UserController@destroy',
+            '/posts/{id}' => 'App\Controllers\Api\PostController@destroy',
+            '/comments/{id}' => 'App\Controllers\Api\CommentController@destroy',
+        ],
+    ],
 ];
