@@ -1,8 +1,8 @@
 <div class="container">
     <div class="row justify-content-center">
         <!-- Registration Form -->
-        <div class="col-md-6">
-            <div class="form-container">
+        <div class="col-md-6 ">
+            <div class="form-container bg-dark-blue-gray custom-text-color custom-border">
                 <h2>Register</h2>
                 <form action="/friendflow/register" method="POST">
                     <div class="form-group">
@@ -59,7 +59,7 @@
     <div class="row mt-4">
         <!-- Additional Content Section -->
         <div class="col-md-12">
-            <div class="content-section">
+            <div class="content-section bg-dark-blue-gray">
                 <h3>Why Join Our Network?</h3>
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque imperdiet purus eu erat
                     laoreet, quis condimentum purus vestibulum. Aenean at accumsan leo. Sed sed odio eget eros bibendum

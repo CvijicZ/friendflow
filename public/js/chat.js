@@ -42,7 +42,7 @@ export function createFriendsModal() {
                 $('#friendRequestModal').modal('show');
             }
             if (response.status == 'error') {
-                $('.friend-requests-container').html("<p>No friend requests");
+                $('.friend-requests-container').html("<p class='text-center'>No friend requests");
                 $('#friendRequestModal').modal('show');
             }
         },

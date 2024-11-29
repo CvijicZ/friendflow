@@ -360,7 +360,7 @@ function displayPosts(posts) {
 
     posts.forEach(post => {
         const postHtml = `
-            <div class="card mb-3 w-auto bg-secondary text-light single-post" id="post-${post.id}">
+            <div class="card mb-3 w-auto bg-dark-blue-gray text-light single-post" id="post-${post.id}">
                 <div class="card-body">
                     <div class="media">
                         <!-- If post is created by auth user show options -->
@@ -377,10 +377,10 @@ function displayPosts(posts) {
                         ` : ''}
                         <img src="app/storage/images/profile_images/${post.user.profile_image_name}" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
                         <div class="media-body">
-                            <h5 class="mt-0 text-dark">
+                            <h5 class="mt-0 custom-text-color">
                                 ${post.user.name} ${post.user.surname}
                             </h5>
-                            <small class="post_date text-dark" data-datetime="${post.created_at}" style="display:block;margin-top:0;font-size:11px;"></small>
+                            <small class="post_date custom-text-color" data-datetime="${post.created_at}" style="display:block;margin-top:0;font-size:11px;"></small>
                             <p style="font-weight:bold;" class="border-bottom" id="post-content-${post.id}">
                                 ${post.content}
                             </p>

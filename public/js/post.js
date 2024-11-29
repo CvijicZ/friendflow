@@ -182,7 +182,7 @@ function createCommentElements(comments, postId, countComments) {
     });
 
     let commentContainerHtml = `
-            <div class="card card-body mt-3 bg-secondary text-light">
+            <div class="card card-body mt-3 bg-dark-blue-gray custom-text-color">
     `;
 
     allComments.forEach(function (comment) {

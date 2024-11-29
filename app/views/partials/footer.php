@@ -1,4 +1,4 @@
-<footer class="bg-dark text-white pt-4">
+<footer class="bg-dark-blue-gray custom-text-color pt-4">
     <div class="container">
         <div class="row">
             <div class="col-md-6">

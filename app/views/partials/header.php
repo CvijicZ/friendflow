@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/friendflow/public/css/style.css">
 </head>
 
-<body>
+<body class="bg-body">
     <!-- Mobile Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top navbar-dark bg-gradient-dark mobile-navbar d-none">
         <div class="container-fluid">
@@ -69,9 +69,9 @@
     </nav>
     <!-- End of navbar -->
     <!-- Desktop Navbar -->
-    <nav class="navbar sticky-top navbar-dark bg-gradient-dark desktop-navbar d-none">
+    <nav class="navbar sticky-top navbar-light bg-dark-blue-gray custom-bottom-border custom-text-color desktop-navbar d-none">
         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <a class="navbar-brand" href="/friendflow/">FriendFlow</a>
+            <a class="navbar-brand custom-text-color" href="/friendflow/">FriendFlow</a>
 
             <?php if (\App\Middlewares\AuthMiddleware::isLoggedIn()) : ?>
                 <div class="d-flex flex-grow-1 justify-content-between align-items-center">

@@ -21,9 +21,9 @@
     <div class="row">
 
         <!-- Left Sidebar -->
-        <div class="sidebar bg-dark text-light col-2" style="height: 100vh; overflow: hidden;">
+        <div class="sidebar bg-body custom-text-color col-2" style="height: 100vh; overflow: hidden;">
 
-            <div class="profile-info mb-3">
+            <div class="profile-info mb-3 bg-dark-blue-gray">
                 <h4>Profile Info</h4>
                 <p id="auth-user-name"><?= htmlspecialchars($data['auth_user']['name']) . " " . htmlspecialchars($data['auth_user']['surname']) ?>
                 </p>
@@ -34,7 +34,7 @@
 
             </div>
 
-            <div class="suggestions">
+            <div class="suggestions bg-dark-blue-gray custom-border">
                 <h4>Suggestions</h4>
                 <?php foreach ($data['suggested_friends'] as $user) : ?>
 
@@ -52,10 +52,10 @@
         <!-- End of left sidebar -->
 
         <!-- Main Section -->
-        <div class="main-content col-8 overflow-auto pb-5 bg-dark" style="height: 100vh;overflow-x: hidden;">
+        <div class="main-content col-8 overflow-auto pb-5 bg-body custom-text-color" style="height: 100vh;overflow-x: hidden;">
 
             <!-- New Post Form -->
-            <div class="card mb-3 w-auto bg-secondary text-light">
+            <div class="card mb-3 w-auto bg-dark-blue-gray custom-text-color">
                 <div class="card-body">
                     <div class="media">
                         <img src="app/storage/images/profile_images/<?= $data['auth_user']['profile_image_name'] ?>" class="mr-3 rounded-circle" alt="User Profile" style="width:64px;height:64px;">
@@ -92,13 +92,13 @@
         </div>
 
         <!-- Right Sidebar -->
-        <div class="sidebar bg-dark text-light col-2" style="height: 100vh; overflow: hidden;">
-            <div class="weather mb-3">
+        <div class="sidebar bg-body custom-text-color col-2" style="height: 100vh; overflow: hidden;">
+            <div class="weather mb-3 bg-dark-blue-gray">
                 <h4>Weather</h4>
                 <p>Weather info will be here...</p>
             </div>
 
-            <div class="chat">
+            <div class="chat bg-dark-blue-gray custom-border">
                 <h4>
                     Chat <span class="badge badge-danger badge-pill unseen-messages-number">0</span>
                 </h4>
@@ -148,7 +148,7 @@
 <!-- Friend requests modal -->
 <div class="modal fade" id="friendRequestModal" tabindex="-1" role="dialog" aria-labelledby="friendRequestModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content bg-dark text-white">
+        <div class="modal-content bg-dark-blue-gray custom-text-color custom-border">
             <div class="modal-header">
                 <h5 class="modal-title" id="friendRequestModalLabel">Friend Request</h5>
             </div>
